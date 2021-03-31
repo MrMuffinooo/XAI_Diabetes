@@ -1,0 +1,67 @@
+---
+title: "Diabetes EDA"
+author: "Martyna Majchrzak"
+date: "31 03 2021"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(OpenML)
+library(mlr)
+library(DALEX)
+library(knitr)
+library(naniar)
+library(visdat)
+set.seed(1)
+diabetes <- getOMLDataSet(data.id = 37L)
+diabetes <- diabetes$data
+```
+
+
+
+### Data distribution
+
+```{r zmienne, fig.height=6, fig.width=9}
+library(ggplot2)
+library(gridExtra)
+variables <- names(diabetes)
+
+plots <- lapply(variables, function(variable){
+  ggplot(data=diabetes, aes_string(variable)) +
+    geom_bar(fill='darkred') +
+    ylab('')
+})
+
+grid.arrange(grobs=plots, ncol=3)
+```
+
+The classes 'tested_negative' and 'tested positive' are unballanced, the first one beeing around twice as big as the latter.
+
+The variables `preg` and `age` have simmilar distributions, which makes sense, as an older women is more likely to have been pregant more times.
+
+As we can see, the variables `plas`, `pres`, `skin`, `insu` and `mass` contain 0 values that are clearly outliers. We have the right to suspect that those are hidden outliers.  
+
+
+### Visualisation of missing data
+
+Let's assume that in all variables accept `preg`(where those are logically justified) value 0 is a missing data. Let's visualize how many missing values are there in the dataset.
+
+```{r}
+diabetes_NA<-diabetes
+diabetes_NA[diabetes_NA == 0] <- NA
+diabetes_NA$preg[is.na(diabetes_NA$preg)] <- 0
+
+
+```
+
+```{r, results='markup'}
+visdat::vis_dat(diabetes_NA)
+```
+
+```{r, results='markup'}
+knitr::kable(naniar::miss_var_summary(diabetes_NA), caption = "Procent of missing in dataset")
+
+```
+In the column `insu` there are almost 50% of missing values, and in `skin` - almost 30%. Simply omitting all rows with those values would significantly reduce the size of our dataset, so we can't afford to do that. In the future we will consider using imputation techiques to fill those values with meaningful data or dropping columns `insu` and/or `mass` if it improves the model performance.
