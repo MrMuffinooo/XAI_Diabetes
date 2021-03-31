@@ -1,0 +1,61 @@
+---
+title: "WB XAI-2"
+author: "Jung Jakub, Majchrzak Martyna, Niewiadowski Paweł"
+date: "31.03.2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+```
+
+## R Markdown
+
+```{r, include = FALSE}
+library(DALEX)
+library(OpenML)
+library(mlr)
+library(pROC)
+library(ggplot2)
+library(reshape2)
+
+set.seed(4)
+
+diabetes <- read.csv("diabetes.csv")
+
+diabetes$class[diabetes$class == "tested_positive"] <- 1
+diabetes$class[diabetes$class == "tested_negative"] <- 0
+```
+
+### Przykładowy model
+
+Ranger
+
+```{r message=FALSE}
+m <- sample(1:nrow(diabetes), 0.7*nrow(diabetes))
+diabetes_train <- diabetes[m,]
+diabetes_test <- diabetes[-m,]
+classif_task <- makeClassifTask(id = "lvr", data = diabetes_train, target = "class")
+classif_lrn <- makeLearner("classif.ranger", predict.type = "prob")
+model <- train(classif_lrn, classif_task)
+pred_test <- predict(model, newdata = diabetes_test)$data$prob.0
+roc <- roc(diabetes_test$class, pred_test)
+roc$auc
+plot(roc)
+```
+
+AUC: 0,8261
+
+
+### Heatmapa korelacji
+
+```{r}
+diabetes$class <- as.numeric(diabetes$class)
+diabetes_cor <- round(cor(diabetes),2)
+diabetes_cor <- melt(diabetes_cor)
+ggplot(data = diabetes_cor, aes(x=Var1, y=Var2, fill=value)) + 
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+  midpoint = 0, limit = c(-1,1), space = "Lab")+
+  geom_tile()+
+  geom_text(aes(Var2, Var1, label = value), color = "black", size = 4)
+```
