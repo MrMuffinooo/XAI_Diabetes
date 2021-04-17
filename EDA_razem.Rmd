@@ -19,8 +19,9 @@ library(reshape2)
 library(knitr)
 library(naniar)
 library(visdat)
+library(mice)
 
-set.seed(4)
+set.seed(1)
 
 diabetes <- read.csv("diabetes.csv")
 
@@ -73,6 +74,7 @@ Let's assume that in all variables accept `preg`(where those are logically justi
 diabetes_NA<-diabetes
 diabetes_NA[diabetes_NA == 0] <- NA
 diabetes_NA$preg[is.na(diabetes_NA$preg)] <- 0
+diabetes_NA$insu[is.na(diabetes_NA$insu)] <- 0
 diabetes_NA$class[is.na(diabetes_NA$class)] <- 0
 ```
 
@@ -113,7 +115,7 @@ diabetes_test <- diabetes[-m,]
 diabetes_train$class <- as.factor(diabetes_train$class)
 classif_task <- makeClassifTask(id = "lvr", data = diabetes_train, target = "class")
 classif_lrn <- makeLearner("classif.ranger", predict.type = "prob")
-model <- train(classif_lrn, classif_task)
+model <- mlr::train(classif_lrn, classif_task)
 pred_test <- predict(model, newdata = diabetes_test)$data$prob.0
 roc <- roc(diabetes_test$class, pred_test)
 roc$auc
@@ -121,3 +123,107 @@ plot(roc)
 ```
 
 AUC: 0,8261
+
+## Different datasets versions
+
+### Omitting missing data
+
+In this version we will simply omit all the missing data in the dataset.
+```{r naomit}
+#train
+diabetes_train_naomit<-na.omit(diabetes_train)
+#test
+diabetes_test_naomit<-na.omit(diabetes_test)
+
+# displaying dataset dimensions
+dim(diabetes_train_naomit)
+dim(diabetes_test_naomit)
+```
+
+### Imputation using mice
+For this version we will use a simple mice imputation using PMM method.
+```{r mice}
+# train
+imp_train1 <- mice(diabetes_train, method = "pmm", m = 1, maxit = 1, nnet.MaxNWts=3000)
+diabetes_train_mice <- mice::complete(imp_train1)
+
+#test
+imp_test1 <- mice(diabetes_test, method = "pmm", m = 1, maxit = 1, nnet.MaxNWts=3000)
+diabetes_test_mice <- mice::complete(imp_test1)
+
+# displaying dataset dimensions
+dim(diabetes_train_mice)
+dim(diabetes_test_mice)
+````
+
+### Skipping skin, insu and pres columns
+
+Experiments show, that variables `skin`, `insu` and `pres` often prove to be insignificant. The `skin` variables also has the sighest correlation values with other variables. We will delete them from the dataset, and them impute the few missing values in `mass` and `plas` variables uing mice.
+
+```{r skip}
+# train
+diabetes_train_skip<-diabetes_train[,-c(3,4,5)]
+imp_train2 <- mice(diabetes_train_skip, method = "pmm", m = 1, maxit = 1, nnet.MaxNWts=3000)
+diabetes_train_skip <- mice::complete(imp_train2)
+
+#test
+diabetes_test_skip<-diabetes_test[,-c(3,4,5)]
+imp_test2 <- mice(diabetes_test_skip, method = "pmm", m = 1, maxit = 1, nnet.MaxNWts=3000)
+diabetes_test_skip <- mice::complete(imp_test2)
+
+# displaying dataset dimensions
+dim(diabetes_train_skip)
+dim(diabetes_test_skip)
+
+```
+
+## Checking performance of Ranger on datasets
+
+To evaluate the performance we will use AUC and FalseNegativeRate - which will tell us how many patients the model assigns as healthy despite having diabetes.
+```{r}
+train_datasets<-list()
+train_datasets[[1]]<-diabetes_train_naomit
+train_datasets[[2]]<-diabetes_train_mice
+train_datasets[[3]]<-diabetes_train_skip
+test_datasets<-list()
+test_datasets[[1]]<-diabetes_test_naomit
+test_datasets[[2]]<-diabetes_test_mice
+test_datasets[[3]]<-diabetes_test_skip
+
+auc<-c(0,0,0)
+FNR<-c(0,0,0)
+
+for(i in 1:3){
+  
+  classif_task <- makeClassifTask(data = train_datasets[[i]], 
+                                  target = "class")
+  classif_lrn <- makeLearner("classif.ranger", 
+                           predict.type = "prob")
+  model <- mlr::train(classif_lrn, classif_task)
+  prediction<- predict(model, 
+                       newdata = test_datasets[[i]])$data
+  
+  # auc
+  auc[i] <- measureAUC(probabilities = prediction$prob.1,
+                       truth = prediction$truth,
+                       negative="0",
+                       positive = "1")
+  
+  FNR[i] <- measureFNR(prediction$truth, 
+                       prediction$response,
+                       negative="0",
+                       positive = "1")
+  
+}
+
+```
+
+## Results
+
+```{r results}
+results<-data.frame(AUC=auc, FalseNegativeRate=FNR)
+row.names(results)<-c("naomit", "mice", "skip")
+results
+```
+
+The results are very similar and seem radom (depend on seed).

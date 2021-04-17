@@ -14,6 +14,7 @@ library(DALEX)
 library(knitr)
 library(naniar)
 library(visdat)
+library(mice)
 set.seed(1)
 diabetes <- getOMLDataSet(data.id = 37L)
 diabetes <- diabetes$data
@@ -46,12 +47,13 @@ As we can see, the variables `plas`, `pres`, `skin`, `insu` and `mass` contain 0
 
 ### Visualisation of missing data
 
-Let's assume that in all variables accept `preg`(where those are logically justified) value 0 is a missing data. Let's visualize how many missing values are there in the dataset.
+Let's assume that in all variables accept `preg` and `insu` (where those are logically justified) value 0 is a missing data. Let's visualize how many missing values are there in the dataset.
 
 ```{r}
 diabetes_NA<-diabetes
 diabetes_NA[diabetes_NA == 0] <- NA
 diabetes_NA$preg[is.na(diabetes_NA$preg)] <- 0
+diabetes_NA$insu[is.na(diabetes_NA$insu)] <- 0
 
 
 ```
