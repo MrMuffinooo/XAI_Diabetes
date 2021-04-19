@@ -154,7 +154,7 @@ diabetes_test_mice <- mice::complete(imp_test1)
 # displaying dataset dimensions
 dim(diabetes_train_mice)
 dim(diabetes_test_mice)
-````
+```
 
 ### Skipping skin, insu and pres columns
 
@@ -227,3 +227,47 @@ results
 ```
 
 The results are very similar and seem radom (depend on seed).
+
+```{r message=FALSE, echo=FALSE}
+
+classif_lrn_ada <- makeLearner("classif.ada", predict.type = "prob")
+model_ada <- mlr::train(classif_lrn_ada, classif_task)
+
+classif_lrn_binomial <- makeLearner("classif.binomial", predict.type = "prob")
+model_binomial <- mlr::train(classif_lrn_binomial, classif_task)
+
+classif_lrn_gbm <- makeLearner("classif.randomForest", predict.type = "prob")
+model_gbm <- mlr::train(classif_lrn_gbm, classif_task)
+
+classif_lrn_naiveBayes <- makeLearner("classif.naiveBayes", predict.type = "prob")
+model_naiveBayes <- mlr::train(classif_lrn_naiveBayes, classif_task)
+
+classif_lrn_rForest <- makeLearner("classif.randomForest", predict.type = "prob")
+model_rForest <- mlr::train(classif_lrn_rForest, classif_task)
+
+pred_test <- predict(model_ada, newdata = diabetes_test)$data$prob.0
+roc <- roc(diabetes_test$class, pred_test)
+cat(paste("Ada","AUC:",roc$auc, sep="\t\t"))
+
+
+pred_test <- predict(model_binomial, newdata = diabetes_test)$data$prob.0
+roc <- roc(diabetes_test$class, pred_test)
+cat(paste("Binomial","AUC:",roc$auc, sep="\t\t"))
+
+
+pred_test <- predict(model_gbm, newdata = diabetes_test)$data$prob.0
+roc <- roc(diabetes_test$class, pred_test)
+cat(paste("GBM","AUC:",roc$auc, sep="\t\t"))
+
+
+pred_test <- predict(model_naiveBayes, newdata = diabetes_test)$data$prob.0
+roc <- roc(diabetes_test$class, pred_test)
+cat(paste("Naive Bayes","AUC:",roc$auc, sep="\t\t"))
+
+
+pred_test <- predict(model_rForest, newdata = diabetes_test)$data$prob.0
+roc <- roc(diabetes_test$class, pred_test)
+cat(paste("Random forest","AUC:",roc$auc, sep="\t\t"))
+
+
+```
