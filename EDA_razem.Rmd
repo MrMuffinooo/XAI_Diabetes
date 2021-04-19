@@ -1,0 +1,229 @@
+---
+title: "WB XAI-2"
+author: "Jung Jakub, Majchrzak Martyna, Niewiadowski Paweł"
+date: "31.03.2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+```
+
+```{r, include = FALSE}
+library(DALEX)
+library(OpenML)
+library(mlr)
+library(pROC)
+library(ggplot2)
+library(reshape2)
+library(knitr)
+library(naniar)
+library(visdat)
+library(mice)
+
+set.seed(1)
+
+diabetes <- read.csv("diabetes.csv")
+
+diabetes$class[diabetes$class == "tested_positive"] <- 1
+diabetes$class[diabetes$class == "tested_negative"] <- 0
+```
+
+## Data description
+In the dataset there are 8 features and 1 target.
+
+- `preg` : number of pregnancies
+- `plas` : plasma glucose concentration (mg/dL) at 2 hours in an OGTT (oral glucose tolerance test) - a test in which subject is given glucose and blood samples are taken afterward to determine how quickly it is cleared from the blood
+- `pres` : blood pressure (mm Hg)
+- `skin` : triceps skinfold thickness (mm) measured at the back of the left arm. A measurement giving rough information about body fat percentage.
+- `insu` : 2-hour serum insulin (mu U/ml)
+- `mass` : BMI index (weight in kg/(height in meters)^2)
+- `pedi` : diabetes pedigree function outcome, where DBF is a function that uses information from parents, grandparents, siblings, aunts and uncles, and first cousins and provides a measure of the expected genetic influence of affected and unaffected relatives on the subject’s eventual diabetes risk
+- `age` : age (years)
+- `class` (target): 1 if tested positive for diabetes, 0 otherwise
+
+
+## Data distribution
+
+```{r zmienne, fig.height=6, fig.width=9}
+library(ggplot2)
+library(gridExtra)
+variables <- names(diabetes)
+
+plots <- lapply(variables, function(variable){
+  ggplot(data=diabetes, aes_string(variable)) +
+    geom_bar(fill='darkred') +
+    ylab('')
+})
+
+grid.arrange(grobs=plots, ncol=3)
+```
+
+The classes 'tested_negative' and 'tested positive' are unbalanced, the first one being around twice as big as the latter.
+
+The variables `preg` and `age` have simmilar distributions, which makes sense, as an older women is more likely to have been pregant more times.
+
+As we can see, the variables `plas`, `pres`, `skin`, `insu` and `mass` contain 0 values that are clearly outliers. We have the right to suspect that those are hidden outliers.  
+
+
+## Visualisation of missing data
+
+Let's assume that in all variables accept `preg`(where those are logically justified) value 0 is a missing data. Let's visualize how many missing values are there in the dataset.
+
+```{r}
+diabetes_NA<-diabetes
+diabetes_NA[diabetes_NA == 0] <- NA
+diabetes_NA$preg[is.na(diabetes_NA$preg)] <- 0
+diabetes_NA$insu[is.na(diabetes_NA$insu)] <- 0
+diabetes_NA$class[is.na(diabetes_NA$class)] <- 0
+```
+
+```{r, results='markup'}
+visdat::vis_dat(diabetes_NA)
+```
+
+```{r, results='markup'}
+knitr::kable(naniar::miss_var_summary(diabetes_NA), caption = "Procent of missing in dataset")
+```
+
+
+In the column `insu` there are almost 50% of missing values, and in `skin` - almost 30%. Simply omitting all rows with those values would significantly reduce the size of our dataset, so we can't afford to do that. In the future we will consider using imputation techiques to fill those values with meaningful data or dropping columns `insu` and/or `mass` if it improves the model performance.
+
+
+## Correlation heatmap
+
+```{r}
+diabetes$class <- as.numeric(diabetes$class)
+diabetes_cor <- round(cor(diabetes),2)
+diabetes_cor <- melt(diabetes_cor)
+ggplot(data = diabetes_cor, aes(x=Var1, y=Var2, fill=value)) + 
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+  midpoint = 0, limit = c(-1,1), space = "Lab")+
+  geom_tile()+
+  geom_text(aes(Var2, Var1, label = value), color = "black", size = 4)
+```
+
+
+## Example model
+
+### Ranger
+
+```{r message=FALSE}
+m <- sample(1:nrow(diabetes), 0.7*nrow(diabetes))
+diabetes_train <- diabetes[m,]
+diabetes_test <- diabetes[-m,]
+diabetes_train$class <- as.factor(diabetes_train$class)
+classif_task <- makeClassifTask(id = "lvr", data = diabetes_train, target = "class")
+classif_lrn <- makeLearner("classif.ranger", predict.type = "prob")
+model <- mlr::train(classif_lrn, classif_task)
+pred_test <- predict(model, newdata = diabetes_test)$data$prob.0
+roc <- roc(diabetes_test$class, pred_test)
+roc$auc
+plot(roc)
+```
+
+AUC: 0,8261
+
+## Different datasets versions
+
+### Omitting missing data
+
+In this version we will simply omit all the missing data in the dataset.
+```{r naomit}
+#train
+diabetes_train_naomit<-na.omit(diabetes_train)
+#test
+diabetes_test_naomit<-na.omit(diabetes_test)
+
+# displaying dataset dimensions
+dim(diabetes_train_naomit)
+dim(diabetes_test_naomit)
+```
+
+### Imputation using mice
+For this version we will use a simple mice imputation using PMM method.
+```{r mice}
+# train
+imp_train1 <- mice(diabetes_train, method = "pmm", m = 1, maxit = 1, nnet.MaxNWts=3000)
+diabetes_train_mice <- mice::complete(imp_train1)
+
+#test
+imp_test1 <- mice(diabetes_test, method = "pmm", m = 1, maxit = 1, nnet.MaxNWts=3000)
+diabetes_test_mice <- mice::complete(imp_test1)
+
+# displaying dataset dimensions
+dim(diabetes_train_mice)
+dim(diabetes_test_mice)
+````
+
+### Skipping skin, insu and pres columns
+
+Experiments show, that variables `skin`, `insu` and `pres` often prove to be insignificant. The `skin` variables also has the sighest correlation values with other variables. We will delete them from the dataset, and them impute the few missing values in `mass` and `plas` variables uing mice.
+
+```{r skip}
+# train
+diabetes_train_skip<-diabetes_train[,-c(3,4,5)]
+imp_train2 <- mice(diabetes_train_skip, method = "pmm", m = 1, maxit = 1, nnet.MaxNWts=3000)
+diabetes_train_skip <- mice::complete(imp_train2)
+
+#test
+diabetes_test_skip<-diabetes_test[,-c(3,4,5)]
+imp_test2 <- mice(diabetes_test_skip, method = "pmm", m = 1, maxit = 1, nnet.MaxNWts=3000)
+diabetes_test_skip <- mice::complete(imp_test2)
+
+# displaying dataset dimensions
+dim(diabetes_train_skip)
+dim(diabetes_test_skip)
+
+```
+
+## Checking performance of Ranger on datasets
+
+To evaluate the performance we will use AUC and FalseNegativeRate - which will tell us how many patients the model assigns as healthy despite having diabetes.
+```{r}
+train_datasets<-list()
+train_datasets[[1]]<-diabetes_train_naomit
+train_datasets[[2]]<-diabetes_train_mice
+train_datasets[[3]]<-diabetes_train_skip
+test_datasets<-list()
+test_datasets[[1]]<-diabetes_test_naomit
+test_datasets[[2]]<-diabetes_test_mice
+test_datasets[[3]]<-diabetes_test_skip
+
+auc<-c(0,0,0)
+FNR<-c(0,0,0)
+
+for(i in 1:3){
+  
+  classif_task <- makeClassifTask(data = train_datasets[[i]], 
+                                  target = "class")
+  classif_lrn <- makeLearner("classif.ranger", 
+                           predict.type = "prob")
+  model <- mlr::train(classif_lrn, classif_task)
+  prediction<- predict(model, 
+                       newdata = test_datasets[[i]])$data
+  
+  # auc
+  auc[i] <- measureAUC(probabilities = prediction$prob.1,
+                       truth = prediction$truth,
+                       negative="0",
+                       positive = "1")
+  
+  FNR[i] <- measureFNR(prediction$truth, 
+                       prediction$response,
+                       negative="0",
+                       positive = "1")
+  
+}
+
+```
+
+## Results
+
+```{r results}
+results<-data.frame(AUC=auc, FalseNegativeRate=FNR)
+row.names(results)<-c("naomit", "mice", "skip")
+results
+```
+
+The results are very similar and seem radom (depend on seed).
