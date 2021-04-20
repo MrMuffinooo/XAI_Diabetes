@@ -185,15 +185,17 @@ train_datasets<-list()
 train_datasets[[1]]<-diabetes_train_naomit
 train_datasets[[2]]<-diabetes_train_mice
 train_datasets[[3]]<-diabetes_train_skip
+train_datasets[[4]]<-diabetes_train
 test_datasets<-list()
 test_datasets[[1]]<-diabetes_test_naomit
 test_datasets[[2]]<-diabetes_test_mice
 test_datasets[[3]]<-diabetes_test_skip
+test_datasets[[4]]<-diabetes_test
+auc<-c(0,0,0,0)
+FNR<-c(0,0,0,0)
+BACC<-c(0,0,0,0)
 
-auc<-c(0,0,0)
-FNR<-c(0,0,0)
-
-for(i in 1:3){
+for(i in 1:4){
   
   classif_task <- makeClassifTask(data = train_datasets[[i]], 
                                   target = "class")
@@ -213,6 +215,8 @@ for(i in 1:3){
                        prediction$response,
                        negative="0",
                        positive = "1")
+  BACC[i]<-measureBAC(prediction$truth, 
+                       prediction$response)
   
 }
 
@@ -221,8 +225,8 @@ for(i in 1:3){
 ## Results
 
 ```{r results}
-results<-data.frame(AUC=auc, FalseNegativeRate=FNR)
-row.names(results)<-c("naomit", "mice", "skip")
+results<-data.frame(AUC=auc, FalseNegativeRate=FNR, BalancedAccuracy=BACC)
+row.names(results)<-c("naomit", "mice", "skip", "original")
 results
 ```
 
