@@ -230,6 +230,9 @@ The results are very similar and seem radom (depend on seed).
 
 ```{r message=FALSE, echo=FALSE}
 
+auc<-c(0,0,0,0,0)
+FNR<-c(0,0,0,0,0)
+
 classif_lrn_ada <- makeLearner("classif.ada", predict.type = "prob")
 model_ada <- mlr::train(classif_lrn_ada, classif_task)
 
@@ -245,29 +248,74 @@ model_naiveBayes <- mlr::train(classif_lrn_naiveBayes, classif_task)
 classif_lrn_rForest <- makeLearner("classif.randomForest", predict.type = "prob")
 model_rForest <- mlr::train(classif_lrn_rForest, classif_task)
 
-pred_test <- predict(model_ada, newdata = diabetes_test)$data$prob.0
-roc <- roc(diabetes_test$class, pred_test)
-cat(paste("Ada","AUC:",roc$auc, sep="\t\t"))
+pred_test <- predict(model_ada, newdata = diabetes_test)$data
+
+auc[1] <- measureAUC(probabilities = pred_test$prob.1,
+                       truth = pred_test$truth,
+                       negative="0",
+                       positive = "1")
+  
+FNR[1] <- measureFNR(pred_test$truth, 
+                       pred_test$response,
+                       negative="0",
+                       positive = "1")
 
 
-pred_test <- predict(model_binomial, newdata = diabetes_test)$data$prob.0
-roc <- roc(diabetes_test$class, pred_test)
-cat(paste("Binomial","AUC:",roc$auc, sep="\t\t"))
+
+pred_test <- predict(model_binomial, newdata = diabetes_test)$data
+
+auc[2] <- measureAUC(probabilities = pred_test$prob.1,
+                       truth = pred_test$truth,
+                       negative="0",
+                       positive = "1")
+  
+FNR[2] <- measureFNR(pred_test$truth, 
+                       pred_test$response,
+                       negative="0",
+                       positive = "1")
 
 
-pred_test <- predict(model_gbm, newdata = diabetes_test)$data$prob.0
-roc <- roc(diabetes_test$class, pred_test)
-cat(paste("GBM","AUC:",roc$auc, sep="\t\t"))
+pred_test <- predict(model_gbm, newdata = diabetes_test)$data
+
+auc[3] <- measureAUC(probabilities = pred_test$prob.1,
+                       truth = pred_test$truth,
+                       negative="0",
+                       positive = "1")
+  
+FNR[3] <- measureFNR(pred_test$truth, 
+                       pred_test$response,
+                       negative="0",
+                       positive = "1")
 
 
-pred_test <- predict(model_naiveBayes, newdata = diabetes_test)$data$prob.0
-roc <- roc(diabetes_test$class, pred_test)
-cat(paste("Naive Bayes","AUC:",roc$auc, sep="\t\t"))
+pred_test <- predict(model_naiveBayes, newdata = diabetes_test)$data
+
+auc[4] <- measureAUC(probabilities = pred_test$prob.1,
+                       truth = pred_test$truth,
+                       negative="0",
+                       positive = "1")
+  
+FNR[4] <- measureFNR(pred_test$truth, 
+                       pred_test$response,
+                       negative="0",
+                       positive = "1")
 
 
-pred_test <- predict(model_rForest, newdata = diabetes_test)$data$prob.0
-roc <- roc(diabetes_test$class, pred_test)
-cat(paste("Random forest","AUC:",roc$auc, sep="\t\t"))
+pred_test <- predict(model_rForest, newdata = diabetes_test)$data
+
+auc[5] <- measureAUC(probabilities = pred_test$prob.1,
+                       truth = pred_test$truth,
+                       negative="0",
+                       positive = "1")
+  
+FNR[5] <- measureFNR(pred_test$truth, 
+                       pred_test$response,
+                       negative="0",
+                       positive = "1")
+
+res<-data.frame(AUC=auc, FalseNegativeRate=FNR)
+row.names(res)<-c("Ada", "Binomial", "GBM","Naive Bayes","Random forest")
+res
 
 
 ```
