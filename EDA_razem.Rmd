@@ -21,7 +21,7 @@ library(naniar)
 library(visdat)
 library(mice)
 
-set.seed(1)
+set.seed(13)
 
 diabetes <- read.csv("diabetes.csv")
 
@@ -179,7 +179,8 @@ dim(diabetes_test_skip)
 
 ## Checking performance of Ranger on datasets
 
-To evaluate the performance we will use AUC and FalseNegativeRate - which will tell us how many patients the model assigns as healthy despite having diabetes.
+To evaluate the performance we will use AUC, BalancedAccuracy and FalseNegativeRate - which will tell us how many patients the model assigns as healthy despite having diabetes.
+
 ```{r}
 train_datasets<-list()
 train_datasets[[1]]<-diabetes_train_naomit
@@ -193,7 +194,7 @@ test_datasets[[3]]<-diabetes_test_skip
 test_datasets[[4]]<-diabetes_test
 auc<-c(0,0,0,0)
 FNR<-c(0,0,0,0)
-BACC<-c(0,0,0,0)
+BAC<-c(0,0,0,0)
 
 for(i in 1:4){
   
@@ -215,111 +216,170 @@ for(i in 1:4){
                        prediction$response,
                        negative="0",
                        positive = "1")
-  BACC[i]<-measureBAC(prediction$truth, 
+  BAC[i]<-measureBAC(prediction$truth, 
                        prediction$response)
   
 }
 
 ```
 
-## Results
+## Ranger Results
 
 ```{r results}
-results<-data.frame(AUC=auc, FalseNegativeRate=FNR, BalancedAccuracy=BACC)
+results<-data.frame(AUC=auc, FalseNegativeRate=FNR, BalancedAccuracy=BAC)
 row.names(results)<-c("naomit", "mice", "skip", "original")
 results
 ```
 
-The results are very similar and seem radom (depend on seed).
+The results are very similar and seem random (depend on seed).
+
+## Data Skip
 
 ```{r message=FALSE, echo=FALSE}
 
-auc<-c(0,0,0,0,0)
+AUC<-c(0,0,0,0,0)
 FNR<-c(0,0,0,0,0)
+BAC<-c(0,0,0,0,0)
 
-classif_lrn_ada <- makeLearner("classif.ada", predict.type = "prob")
-model_ada <- mlr::train(classif_lrn_ada, classif_task)
+classifiers=c("classif.ranger", "classif.ada", "classif.binomial", "classif.gbm", "classif.naiveBayes", "classif.randomForest")
 
-classif_lrn_binomial <- makeLearner("classif.binomial", predict.type = "prob")
-model_binomial <- mlr::train(classif_lrn_binomial, classif_task)
+classif_task <- makeClassifTask(id = "lvr", data = diabetes_train_skip, target = "class")
 
-classif_lrn_gbm <- makeLearner("classif.randomForest", predict.type = "prob")
-model_gbm <- mlr::train(classif_lrn_gbm, classif_task)
-
-classif_lrn_naiveBayes <- makeLearner("classif.naiveBayes", predict.type = "prob")
-model_naiveBayes <- mlr::train(classif_lrn_naiveBayes, classif_task)
-
-classif_lrn_rForest <- makeLearner("classif.randomForest", predict.type = "prob")
-model_rForest <- mlr::train(classif_lrn_rForest, classif_task)
-
-pred_test <- predict(model_ada, newdata = diabetes_test)$data
-
-auc[1] <- measureAUC(probabilities = pred_test$prob.1,
+for (i in 1:length(classifiers)){
+    classif_lrn <- makeLearner(classifiers[i], predict.type = "prob")
+    model <- mlr::train(classif_lrn, classif_task)
+    pred_test <- predict(model, newdata = diabetes_test_skip)$data
+    AUC[i] <- measureAUC(probabilities = pred_test$prob.1,
                        truth = pred_test$truth,
                        negative="0",
                        positive = "1")
-  
-FNR[1] <- measureFNR(pred_test$truth, 
+
+    FNR[i] <- measureFNR(pred_test$truth,
                        pred_test$response,
                        negative="0",
                        positive = "1")
+    BAC[i] <- measureBAC(pred_test$truth,
+                       pred_test$response)
+    
+}  
 
-
-
-pred_test <- predict(model_binomial, newdata = diabetes_test)$data
-
-auc[2] <- measureAUC(probabilities = pred_test$prob.1,
-                       truth = pred_test$truth,
-                       negative="0",
-                       positive = "1")
-  
-FNR[2] <- measureFNR(pred_test$truth, 
-                       pred_test$response,
-                       negative="0",
-                       positive = "1")
-
-
-pred_test <- predict(model_gbm, newdata = diabetes_test)$data
-
-auc[3] <- measureAUC(probabilities = pred_test$prob.1,
-                       truth = pred_test$truth,
-                       negative="0",
-                       positive = "1")
-  
-FNR[3] <- measureFNR(pred_test$truth, 
-                       pred_test$response,
-                       negative="0",
-                       positive = "1")
-
-
-pred_test <- predict(model_naiveBayes, newdata = diabetes_test)$data
-
-auc[4] <- measureAUC(probabilities = pred_test$prob.1,
-                       truth = pred_test$truth,
-                       negative="0",
-                       positive = "1")
-  
-FNR[4] <- measureFNR(pred_test$truth, 
-                       pred_test$response,
-                       negative="0",
-                       positive = "1")
-
-
-pred_test <- predict(model_rForest, newdata = diabetes_test)$data
-
-auc[5] <- measureAUC(probabilities = pred_test$prob.1,
-                       truth = pred_test$truth,
-                       negative="0",
-                       positive = "1")
-  
-FNR[5] <- measureFNR(pred_test$truth, 
-                       pred_test$response,
-                       negative="0",
-                       positive = "1")
-
-res<-data.frame(AUC=auc, FalseNegativeRate=FNR)
-row.names(res)<-c("Ada", "Binomial", "GBM","Naive Bayes","Random forest")
+res<-data.frame(AUC=AUC, FalseNegativeRate=FNR, BalancedAccuracy=BAC)
+row.names(res)<-c("Ranger", "Ada", "Binomial", "GBM","Naive Bayes","Random forest")
 res
 
+
+```
+
+## Data Original
+
+```{r message=FALSE, echo=FALSE}
+
+AUC<-c(0,0,0,0,0)
+FNR<-c(0,0,0,0,0)
+BAC<-c(0,0,0,0,0)
+
+classifiers=c("classif.ranger", "classif.ada", "classif.binomial", "classif.gbm", "classif.naiveBayes", "classif.randomForest")
+
+classif_task <- makeClassifTask(id = "lvr", data = diabetes_train, target = "class")
+
+for (i in 1:length(classifiers)){
+    classif_lrn <- makeLearner(classifiers[i], predict.type = "prob")
+    model <- mlr::train(classif_lrn, classif_task)
+    pred_test <- predict(model, newdata = diabetes_test)$data
+    AUC[i] <- measureAUC(probabilities = pred_test$prob.1,
+                       truth = pred_test$truth,
+                       negative="0",
+                       positive = "1")
+
+    FNR[i] <- measureFNR(pred_test$truth,
+                       pred_test$response,
+                       negative="0",
+                       positive = "1")
+    BAC[i] <- measureBAC(pred_test$truth,
+                       pred_test$response)
+    
+}  
+
+res<-data.frame(AUC=AUC, FalseNegativeRate=FNR, BalancedAccuracy=BAC)
+row.names(res)<-c("Ranger", "Ada", "Binomial", "GBM","Naive Bayes","Random forest")
+res
+
+
+```
+
+## Tuning params Ranger - skip
+
+Użyjemy random search dla hiperparametrów: `num.trees`, `mtry`, `min.nod.size` i `splitrule`. 
+Użyjemy zbiorów danych diabetes_skip i posłużymy się miarą fnr.
+
+```{r}
+classif_task <- makeClassifTask(id = "lvr_tune_random", data = diabetes_train_skip, target = "class")
+classif_lrn <- makeLearner("classif.ranger", predict.type = "prob")
+cv <- makeResampleDesc("CV", iter = 10)
+model_raw <- mlr::train(classif_lrn, classif_task)
+pred_test <- predict(model, newdata = diabetes_test)$data$prob.0
+
+ranger_ps <- makeParamSet(
+  makeIntegerParam("num.trees", lower = 100, upper = 1000),
+  makeIntegerParam("mtry", lower = 1, upper = 5),
+  makeIntegerParam("min.node.size", lower = 1, upper = 10),
+  makeDiscreteParam("splitrule", values=c("gini", "extratrees"))
+  )
+
+ctrl_random <- makeTuneControlRandom(maxit = 100)
+res_random <- tuneParams(classif_lrn, 
+                         task = classif_task, 
+                         resampling = cv,
+                         par.set = ranger_ps, 
+                         control = ctrl_random, 
+                         measures = fnr)
+
+model_random
+```
+```{r}
+model_random <- train(res_random$learner, classif_task)
+pred_random <- predict(model_random, newdata = diabetes_test_skip)$data
+fnr_ranger_tuned_skip<-measureFNR(pred_random$truth,
+                       pred_random$response,
+                       negative="0",
+                       positive = "1")
+fnr_ranger_tuned_skip
+
+```
+## Tuning params Ranger - original
+
+Użyjemy random search dla hiperparametrów: `num.trees`, `mtry`, `min.nod.size` i `splitrule`. 
+Użyjemy oryginalnych zbiorów danych diabetes i posłużymy się miarą fnr.
+
+```{r}
+classif_task <- makeClassifTask(id = "lvr_tune_random", data = diabetes_train, target = "class")
+classif_lrn <- makeLearner("classif.ranger", predict.type = "prob")
+cv <- makeResampleDesc("CV", iter = 10)
+model_raw <- mlr::train(classif_lrn, classif_task)
+pred_test <- predict(model, newdata = diabetes_test)$data$prob.0
+
+ranger_ps <- makeParamSet(
+  makeIntegerParam("num.trees", lower = 100, upper = 1000),
+  makeIntegerParam("mtry", lower = 1, upper = 8),
+  makeIntegerParam("min.node.size", lower = 1, upper = 10),
+  makeDiscreteParam("splitrule", values=c("gini", "extratrees"))
+  )
+
+ctrl_random <- makeTuneControlRandom(maxit = 50)
+res_random <- tuneParams(classif_lrn, 
+                         task = classif_task, 
+                         resampling = cv,
+                         par.set = ranger_ps, 
+                         control = ctrl_random, 
+                         measures = fnr)
+
+model_random <- train(res_random$learner, classif_task)
+pred_random <- predict(model_random, newdata = diabetes_test)$data
+fnr_ranger_tuned_original<- measureFNR(pred_random$truth,
+                       pred_random$response,
+                       negative="0",
+                       positive = "1")
+
+fnr_ranger_tuned_original
 
 ```
