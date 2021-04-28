@@ -400,7 +400,7 @@ model_random_skip <- ranger::ranger(class~., data = diabetes_train_skip, classif
 samp <- sample(1:231, 5)
 explainer <- explain(model = model_random_skip,
                      data = diabetes_test_skip[,-6],
-             y = diabetes_test_skip$class)
+             y = as.numeric(as.character(diabetes_test_skip$class)))
 
 cp_profile_1 <- predict_profile(explainer, diabetes_test_skip[samp,-6])
 plot(cp_profile_1, color = "_ids_")
@@ -408,14 +408,17 @@ plot(cp_profile_1, color = "_ids_")
 ```
 
 ```{r}
-#lime_ranger1 <- predict_surrogate(
-#  explainer = explainer,
-#  new_observation = diabetes_test_skip[samp[1], -6], 
-#  n_features = 3, 
-#  n_permutations = 1000,
-#  type = "lime")
-#
-#plot(lime_ranger1)
+model_type.dalex_explainer <- DALEXtra::model_type.dalex_explainer
+predict_model.dalex_explainer <- DALEXtra::predict_model.dalex_explainer
+
+lime_ranger1 <- predict_surrogate(
+  explainer = explainer,
+  new_observation = diabetes_test_skip[samp[1], -6], 
+  n_features = 3, 
+  n_permutations = 1000,
+  type = "lime")
+
+plot(lime_ranger1)
 ```
 ```{r}
 pp_bd_1 <- predict_parts(explainer, new_observation = diabetes_test_skip[samp[1], -6], type = "break_down")
