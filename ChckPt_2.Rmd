@@ -1,0 +1,90 @@
+---
+title: "WB XAI-2"
+author: "Jung Jakub, Majchrzak Martyna, Niewiadowski Paweł"
+date: "9.05.2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+```
+
+```{r, include = FALSE}
+library(DALEX)
+library(DALEXtra)
+library(OpenML)
+library(mlr)
+library(pROC)
+library(ggplot2)
+library(reshape2)
+library(knitr)
+library(naniar)
+library(visdat)
+library(mice)
+
+set.seed(13)
+
+diabetes <- read.csv("diabetes.csv")
+
+diabetes$class[diabetes$class == "tested_positive"] <- 1
+diabetes$class[diabetes$class == "tested_negative"] <- 0
+
+```
+```{r, results = FALSE}
+
+m <- sample(1:nrow(diabetes), 0.7*nrow(diabetes))
+diabetes_train <- diabetes[m,]
+diabetes_test <- diabetes[-m,]
+classif_task <- makeClassifTask(id = "lvr", data = diabetes_train, target = "class")
+classif_lrn <- makeLearner("classif.ranger", predict.type = "prob")
+model <- train(classif_lrn, classif_task)
+
+explainer <- DALEX::explain(model = model,
+                     data = diabetes,
+                     y = diabetes$class)
+
+```
+
+
+## Data description
+In the dataset there are 8 features and 1 target.
+
+- `preg` : number of pregnancies
+- `plas` : plasma glucose concentration (mg/dL) at 2 hours in an OGTT (oral glucose tolerance test) - a test in which subject is given glucose and blood samples are taken afterward to determine how quickly it is cleared from the blood
+- `pres` : blood pressure (mm Hg)
+- `skin` : triceps skinfold thickness (mm) measured at the back of the left arm. A measurement giving rough information about body fat percentage.
+- `insu` : 2-hour serum insulin (mu U/ml)
+- `mass` : BMI index (weight in kg/(height in meters)^2)
+- `pedi` : diabetes pedigree function outcome, where DBF is a function that uses information from parents, grandparents, siblings, aunts and uncles, and first cousins and provides a measure of the expected genetic influence of affected and unaffected relatives on the subject’s eventual diabetes risk
+- `age` : age (years)
+- `class` (target): 1 if tested positive for diabetes, 0 otherwise
+
+## Variable importance
+```{r}
+fi_1 <- model_parts(explainer, B = 10)
+plot(fi_1)
+```
+
+
+## Average influence on prediction
+```{r, fig.height=6, fig.width=9}
+pdp_1 <- model_profile(explainer)
+plot(pdp_1)
+```
+
+
+```{r, fig.height=6, fig.width=9}
+pdp_2 <- model_profile(explainer,k=2)
+plot(pdp_2, geom = "profiles")
+```
+
+```{r, fig.height=6, fig.width=9}
+pdp_3 <- model_profile(explainer,k=3)
+plot(pdp_3)
+```
+
+```{r, fig.height=6, fig.width=9}
+pdp_4 <- model_profile(explainer, variables = "plas")
+pdp_5 <- model_profile(explainer, variables = "mass")
+plot(pdp_4,pdp_5)
+```
