@@ -67,6 +67,7 @@ plot(fi_1)
 
 
 ## Average influence on prediction
+### PDP
 ```{r, fig.height=6, fig.width=9}
 pdp_1 <- model_profile(explainer)
 plot(pdp_1)
@@ -83,8 +84,36 @@ pdp_3 <- model_profile(explainer,k=3)
 plot(pdp_3)
 ```
 
+### ALE
+
+```{r, fig.height=6, fig.width=9}
+ale_1 <- model_profile(explainer,type="accumulated")
+plot(ale_1)
+```
+
+```{r, fig.height=6, fig.width=9}
+ale_2 <- model_profile(explainer,k=2,type="accumulated")
+plot(ale_2, geom = "profiles")
+```
+
+```{r, fig.height=6, fig.width=9}
+ale_3 <- model_profile(explainer,k=3,type="accumulated")
+plot(ale_3)
+```
+
+
 ```{r, fig.height=6, fig.width=9}
 pdp_4 <- model_profile(explainer, variables = "plas")
+ale_4 <- model_profile(explainer, variables = "plas",type="accumulated")
+ale_4$agr_profiles$`_label_` <- "ale"
+pdp_4$agr_profiles$`_label_` <- "pdp"
+plot(pdp_4,ale_4)
+```
+
+```{r, fig.height=6, fig.width=9}
 pdp_5 <- model_profile(explainer, variables = "mass")
-plot(pdp_4,pdp_5)
+ale_5 <- model_profile(explainer, variables = "mass",type="accumulated")
+ale_5$agr_profiles$`_label_` <- "ale"
+pdp_5$agr_profiles$`_label_` <- "pdp"
+plot(pdp_5,ale_5)
 ```
