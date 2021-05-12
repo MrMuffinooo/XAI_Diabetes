@@ -1,0 +1,46 @@
+---
+title: "Ada tune"
+author: "Martyna Majchrzak"
+date: "12 05 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Tuning params Ada - skip
+
+Użyjemy random search dla hiperparametrów: `loss`, `type`, `iter`, `nu`, `max.iter`, `minsplit`, `minbucket`, `maxdepth`.
+Użyjemy zbiorów danych diabetes_skip i posłużymy się miarą fnr.
+
+```{r}
+classif_task <- makeClassifTask(id = "ada_tune_random", data = diabetes_train_skip, target = "class")
+classif_lrn <- makeLearner("classif.ada", predict.type = "prob")
+cv <- makeResampleDesc("CV", iter = 5)
+model<- mlr::train(classif_lrn, classif_task)
+pred_test <- predict(model, newdata = diabetes_test_skip)$data$prob.0
+```
+
+```{r}
+ada_ps <- makeParamSet(
+  makeDiscreteParam("loss", values=c("exponential", "logistic")),
+  makeDiscreteParam("type", values=c("discrete", "real", "gentle")),
+  makeIntegerParam("iter", lower = 30, upper = 500),
+  makeIntegerParam("max.iter", lower = 1, upper = 50),
+  makeIntegerParam("minsplit", lower = 1, upper = 50),
+  makeIntegerParam("minbucket", lower = 1, upper = 50),
+  makeIntegerParam("maxdepth", lower = 1, upper = 30)
+  )
+
+ctrl_random <- makeTuneControlRandom(maxit = 100)
+res_random <- tuneParams(classif_lrn, 
+                         task = classif_task, 
+                         resampling = cv,
+                         par.set = ada_ps, 
+                         control = ctrl_random, 
+                         measures = fnr)
+
+res_random
+```
