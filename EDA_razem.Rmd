@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 
 ```{r, include = FALSE}
 library(DALEX)
+library(DALEXtra)
 library(OpenML)
 library(mlr)
 library(pROC)
@@ -158,7 +159,7 @@ dim(diabetes_test_mice)
 
 ### Skipping skin, insu and pres columns
 
-Experiments show, that variables `skin`, `insu` and `pres` often prove to be insignificant. The `skin` variables also has the sighest correlation values with other variables. We will delete them from the dataset, and them impute the few missing values in `mass` and `plas` variables uing mice.
+Experiments show, that variables `skin`, `insu` and `pres` often prove to be insignificant. The `skin` variables also has the sighest correlation values with other variables. We will delete them from the dataset, and then impute the few missing values in `mass` and `plas` variables uing mice.
 
 ```{r skip}
 # train
@@ -326,7 +327,7 @@ ranger_ps <- makeParamSet(
   makeDiscreteParam("splitrule", values=c("gini", "extratrees"))
   )
 
-ctrl_random <- makeTuneControlRandom(maxit = 100)
+ctrl_random <- makeTuneControlRandom(maxit = 50)
 res_random <- tuneParams(classif_lrn, 
                          task = classif_task, 
                          resampling = cv,
@@ -334,11 +335,10 @@ res_random <- tuneParams(classif_lrn,
                          control = ctrl_random, 
                          measures = fnr)
 
-model_random
 ```
 ```{r}
-model_random <- train(res_random$learner, classif_task)
-pred_random <- predict(model_random, newdata = diabetes_test_skip)$data
+model_random_skip <- train(res_random$learner, classif_task)
+pred_random <- predict(model_random_skip, newdata = diabetes_test_skip)$data
 fnr_ranger_tuned_skip<-measureFNR(pred_random$truth,
                        pred_random$response,
                        negative="0",
@@ -382,4 +382,90 @@ fnr_ranger_tuned_original<- measureFNR(pred_random$truth,
 
 fnr_ranger_tuned_original
 
+```
+
+## Explanations
+
+```{r boxlot mass}
+boxplot(diabetes$mass, horizontal = TRUE)
+mean(diabetes$mass)
+```
+
+![BMI chart](BMI_chart.jfif)
+
+
+```{r}
+model_random_skip <- ranger::ranger(class~., data = diabetes_train_skip, classification = TRUE, probability = TRUE, num.trees=776, mtry=1, min.node.size=8, splitrule="extratrees")
+
+samp <- sample(1:231, 5)
+explainer <- explain(model = model_random_skip,
+                     data = diabetes_test_skip[,-6],
+             y = as.numeric(as.character(diabetes_test_skip$class)))
+
+cp_profile_1 <- predict_profile(explainer, diabetes_test_skip[samp,-6])
+plot(cp_profile_1, color = "_ids_")
+
+```
+
+```{r}
+model_type.dalex_explainer <- DALEXtra::model_type.dalex_explainer
+predict_model.dalex_explainer <- DALEXtra::predict_model.dalex_explainer
+
+lime_ranger1 <- predict_surrogate(
+  explainer = explainer,
+  new_observation = diabetes_test_skip[samp[1], -6], 
+  n_features = 3, 
+  n_permutations = 1000,
+  type = "lime")
+
+plot(lime_ranger1)
+```
+```{r}
+pp_bd_1 <- predict_parts(explainer, new_observation = diabetes_test_skip[samp[1], -6], type = "break_down")
+plot(pp_bd_1)
+```
+
+
+```{r}
+pp_shap_1 <- predict_parts(explainer, new_observation = diabetes_test_skip[samp[1], -6], type = "shap", B = 5)
+plot(pp_shap_1)
+```
+
+```{r}
+pp_bd_1 <- predict_parts(explainer, new_observation = diabetes_test_skip[samp[2], -6], type = "break_down")
+plot(pp_bd_1)
+```
+
+```{r}
+pp_shap_1 <- predict_parts(explainer, new_observation = diabetes_test_skip[samp[2], -6], type = "shap", B = 5)
+plot(pp_shap_1)
+```
+
+```{r}
+pp_bd_1 <- predict_parts(explainer, new_observation = diabetes_test_skip[samp[3], -6], type = "break_down")
+plot(pp_bd_1)
+```
+
+```{r}
+pp_shap_1 <- predict_parts(explainer, new_observation = diabetes_test_skip[samp[3], -6], type = "shap", B = 5)
+plot(pp_shap_1)
+```
+
+```{r}
+pp_bd_1 <- predict_parts(explainer, new_observation = diabetes_test_skip[samp[4], -6], type = "break_down")
+plot(pp_bd_1)
+```
+
+```{r}
+pp_shap_1 <- predict_parts(explainer, new_observation = diabetes_test_skip[samp[4], -6], type = "shap", B = 5)
+plot(pp_shap_1)
+```
+```{r}
+pp_bd_1 <- predict_parts(explainer, new_observation = diabetes_test_skip[samp[5], -6], type = "break_down")
+plot(pp_bd_1)
+```
+
+```{r}
+pp_shap_1 <- predict_parts(explainer, new_observation = diabetes_test_skip[samp[5], -6], type = "shap", B = 5)
+plot(pp_shap_1)
 ```
