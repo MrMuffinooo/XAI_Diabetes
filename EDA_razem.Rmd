@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+knitr::opts_chunk$set(echo = TRUE, cache=TRUE, warning = FALSE)
 ```
 
 ```{r, include = FALSE}
@@ -127,6 +127,12 @@ AUC: 0,8261
 
 ## Different datasets versions
 
+```{r}
+m <- sample(1:nrow(diabetes_NA), 0.7*nrow(diabetes_NA))
+diabetes_train_NA <- diabetes_NA[m,]
+diabetes_test_NA <- diabetes_NA[-m,]
+```
+
 ### Omitting missing data
 
 In this version we will simply omit all the missing data in the dataset.
@@ -168,7 +174,7 @@ imp_train2 <- mice(diabetes_train_skip, method = "pmm", m = 1, maxit = 1, nnet.M
 diabetes_train_skip <- mice::complete(imp_train2)
 
 #test
-diabetes_test_skip<-diabetes_test[,-c(3,4,5)]
+diabetes_test_skip<-diabetes_test_NA[,-c(3,4,5)]
 imp_test2 <- mice(diabetes_test_skip, method = "pmm", m = 1, maxit = 1, nnet.MaxNWts=3000)
 diabetes_test_skip <- mice::complete(imp_test2)
 
@@ -314,6 +320,13 @@ res
 ```{r boxlot mass}
 boxplot(diabetes$mass, horizontal = TRUE)
 mean(diabetes$mass)
+
+# library(ggplot2) 
+# diabetes_skip<-rbind(diabetes_train_skip, diabetes_test_skip)
+# ggplot(diabetes_skip, aes(x=mass)) + 
+#   geom_boxplot(fill="darkred")+
+#   xlim(-0.2,0.2)
+#   theme_minimal()
 ```
 
 ![BMI chart](BMI_chart.jfif)
@@ -324,7 +337,7 @@ mean(diabetes$mass)
 model_random_skip_ranger <- ranger::ranger(class~., data = diabetes_train_skip, classification = TRUE, probability = TRUE, num.trees=776, mtry=1, min.node.size=8, splitrule="extratrees")
 
 samp <- sample(1:231, 5)
-explainer <- explain(model = model_random_skip_ranger,
+explainer <- explain(id= 'ranger', model = model_random_skip_ranger,
                      data = diabetes_test_skip[,-6],
              y = as.numeric(as.character(diabetes_test_skip$class)))
 
@@ -339,7 +352,7 @@ plot(cp_profile_1, color = "_ids_")
 classif_task <- makeClassifTask(id = "ada_tune_random", data = diabetes_train_skip, target = "class")
 classif_lrn <- makeLearner("classif.ada", predict.type = "prob", par.vals = list(loss='logistic', type='discrete', iter=81, max.iter=3, minsplit=45, minbucket=4, maxdepth=1))
 model_random_skip_ada<- mlr::train(classif_lrn, classif_task)
-explainer_ada <- explain(model = model_random_skip_ada,
+explainer_ada <- explain(id='Ada', model = model_random_skip_ada,
                      data = diabetes_test_skip[,-6],
              y = as.numeric(as.character(diabetes_test_skip$class)))
 
@@ -410,7 +423,7 @@ plot(pp_shap_1)
 
 ## Global Explanations
 
-## Variable importance
+### Variable importance
 
 ```{r}
 fi_1 <- model_parts(explainer, B = 10)
@@ -418,7 +431,7 @@ fi_2 <- model_parts(explainer_ada, B = 10)
 plot(fi_1, fi_2)
 ```
 
-## Average influence on prediction
+### Average influence on prediction
 
 ```{r, fig.height=6, fig.width=9}
 pdp_1 <- model_profile(explainer)
