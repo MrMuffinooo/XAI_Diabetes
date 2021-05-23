@@ -1,0 +1,55 @@
+---
+title: "Raport"
+author: "Martyna Majchrzak, Jakub Jung, Paweł Niewiadowski"
+date: "23 05 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Abstract
+
+## Keywords
+
+# Introduction (Jung)
+
+What do we lready know about diabetes
+
+Research question?
+
+# Methods
+
+## Dataset (Jung)
+
+descriptions, distributions, missing data
+
+## Dataset versions (Martyna)
+
+original, naomit, mice, skip
+
+## Models (Martyna)
+
+ranger, ada
+
+## Explanations (Karol)
+
+# Results
+
+## Model comparison 
+
+## Explanations results
+
+### Global
+
+### Local
+
+# Discussion
+
+## Expert opions + comparison
+
+# Conclusion
+
+# References
+
