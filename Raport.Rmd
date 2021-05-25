@@ -35,6 +35,69 @@ ranger, ada
 
 ## Explanations (Karol)
 
+
+### Local
+
+#### Break Down
+
+#### Shap
+
+#### Lime
+
+jest niezależna od modelu, ponieważ nie pociąga za sobą żadnych założeń dotyczących struktury modelu czarnej skrzynki
+
+zapewnia lokalną wierność, tj. wyjaśnienia są lokalnie dobrze dopasowane do modelu czarnej skrzynki
+
+
+istnieją różne propozycje znalezienia interpretowalnych reprezentacji dla ciągłych i kategorycznych zmiennych objaśniających w przypadku danych tabelarycznych. Problem ten nie został jeszcze rozwiązany. Prowadzi to do różnych implementacji LIME, które używają różnych metod transformacji zmiennych, co w konsekwencji może prowadzić do różnych wyników
+
+w przypadku danych wielowymiarowych, punkty danych są rzadkie. Zdefiniowanie "lokalnego sąsiedztwa" dla interesującej nas instancji może nie być proste
+
+#### Centris Paribus
+
+
+Proste i jednolite podejście do ekspolracji modelu
+
+Przystępna graficzna reprezentacja
+
+Możliwość porównania wyjaśnień kilku modeli
+
+Łatwa rozszerznalność
+
+
+Wrażliwy na zmienne skorelowane
+
+Wrażliwy na interakcje
+
+
+
+### Global
+
+#### Feature Importance
+
+#### Triplot???
+
+#### Partial Dependence
+
+easy to understand
+
+intuitive
+
+can handle interaction in multidimensional cas
+
+
+struggle with correlated features
+
+#### Acumulated Dependence
+
+
+Can handle correlated features
+
+
+
+Hard to understand, easy to intepretate
+
+
 # Results
 
 ## Model comparison 
