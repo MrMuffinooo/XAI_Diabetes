@@ -406,29 +406,42 @@ summary {
 </div>
 <div id="explanations-karol" class="section level2">
 <h2>Explanations (Karol)</h2>
+<p>In this section we will take time to look into some model explainations that we will be using later on. Feel free to use this chapter as reference for quick overview. For more in depth informations please refer to <a href="https://ema.drwhy.ai/InstanceLevelExploration.html" class="uri">https://ema.drwhy.ai/InstanceLevelExploration.html</a> //bookdown?? TODO</p>
 <div id="local" class="section level3">
 <h3>Local</h3>
+<p>Local explainations allow us to better understand model’s prediction from the level of single observations. This can be usefull when we want to evaluate predictions for particular instances. For example which values have the most importance for the particular observations, or how the change in variables would impact the result. Local explainations combined with professional expertise could somtimes hint towards potential problems with the model in case they contradict eachother.</p>
 <div id="break-down" class="section level4">
 <h4>Break Down</h4>
+<p>In this explaination all observations start from the same base that is the mean prediction for all data. Next steps consist of fixing consequtive variables on values from the observation in question and measuring the change in mean prediction that is now calculeted with some of the values fixed. This shift in mean prediction is interpreted as the impact of this variable’s value on prediction for this observation.</p>
+<p>OBRAZEK TODO</p>
+<p>Figure: Panel A shows the distribution and mean prediction with values on the same level and above fixed on values from observation. Then change in mean is calculeted and assigned to corresponding variables.</p>
+<p>A big dravback for this method is how the order of variable can influence the explaination outcome. This problems occurs most often as a result of existing interactions between variables as seen in OBRAZEK TODO</p>
+<p>OBRAZEK TODO</p>
+<p>Figure: Variables age and class interact with eachother so the changing order results in different plots</p>
 </div>
 <div id="shap" class="section level4">
 <h4>Shap</h4>
+<p>Shap is a direct responce to the biggest problem of Break Down method that is the ordering chosen for explaination could alter the results. Shap takes a nuber of permutation and calculates the average responce of Break Down on theese permutations. More permutations results in more stable explainations.</p>
+<p>OBRAZEK TODO</p>
+<p>Figure: Different results of Break Down for 10 random variable orders</p>
+<p>OBRAZEK TODO</p>
+<p>Figure: Shap output. Average impact calculeted with Break Down for 10 permutations</p>
 </div>
 <div id="lime" class="section level4">
 <h4>Lime</h4>
-<p>jest niezależna od modelu, ponieważ nie pociąga za sobą żadnych założeń dotyczących struktury modelu czarnej skrzynki</p>
-<p>zapewnia lokalną wierność, tj. wyjaśnienia są lokalnie dobrze dopasowane do modelu czarnej skrzynki</p>
-<p>istnieją różne propozycje znalezienia interpretowalnych reprezentacji dla ciągłych i kategorycznych zmiennych objaśniających w przypadku danych tabelarycznych. Problem ten nie został jeszcze rozwiązany. Prowadzi to do różnych implementacji LIME, które używają różnych metod transformacji zmiennych, co w konsekwencji może prowadzić do różnych wyników</p>
-<p>w przypadku danych wielowymiarowych, punkty danych są rzadkie. Zdefiniowanie “lokalnego sąsiedztwa” dla interesującej nas instancji może nie być proste</p>
+<p>The essence of Lime is to locally approximate the black box model with a glass box one. Then we can use it for local explainations that should yeld results appropiate for the black box. Firstly we generate data “close” to our observation (also called Point of Interest) and make predictions with black box model. Based on those predictions wy try to fit the glass box model that acurately predicts those observations. In result we receive a glassbox model that should behave the same as original model as long as we ramain close to the Point of interest.</p>
+<p>OBRAZEK TODO</p>
+<p>Figure: Colored areas correspond to different prediction for the black box model. Black cross is our Point of Interest and circles are generated data. The line represents our simpler model that approximates original model around Point of Interest</p>
+<p>This method is often used for datasets consisting of a large amount of variables. Methods like Break down and Shap come out short in theese situations.</p>
 </div>
 <div id="centris-paribus" class="section level4">
 <h4>Centris Paribus</h4>
-<p>Proste i jednolite podejście do ekspolracji modelu</p>
-<p>Przystępna graficzna reprezentacja</p>
-<p>Możliwość porównania wyjaśnień kilku modeli</p>
-<p>Łatwa rozszerznalność</p>
-<p>Wrażliwy na zmienne skorelowane</p>
-<p>Wrażliwy na interakcje</p>
+<p>Centris Paribus is a Latin phrase meaning “all else unchanged”. This acuratly describes what it does. For the certain observation we take values that are interesting to us and observe how the prediction changes as we change values in those columns one at a time. This can yeld interesting conclusions about change in values and it’s impact on predictions.</p>
+<p>OBRAZEK TODO</p>
+<p>Figure: Shape of lines resebles the nature of the model. Dot shows value and model’s prediction for the observation.</p>
+<p>OBRAZEK TODO</p>
+<p>Figure: Centris Paribus shows different importance in variables and their changes for different observations</p>
+<p>Centris Paribus is very popular due to it’s simplicity and interpretability. The biggest dravback however is it’s possible unpredictable or missleading results. For example with fixed variable age set to 18 predicting outcome for a significant number of pregnancies doesn’t make sense. It’s also hard to interactions when working with variables separetly.</p>
 </div>
 </div>
 <div id="global" class="section level3">
