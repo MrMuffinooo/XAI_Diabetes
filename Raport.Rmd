@@ -45,35 +45,31 @@ Local explainations allow us to better understand model's prediction from the le
 
 In this explaination all observations start from the same base that is the mean prediction for all data. Next steps consist of fixing consequtive variables on values from the observation in question and measuring the change in mean prediction that is now calculeted with some of the values fixed. This shift in mean prediction is interpreted as the impact of this variable's value on prediction for this observation.
 
-OBRAZEK TODO
 
+![Break Down algorythm](./img/break_down_distr.png "Break Down algorythm")
 Figure: Panel A shows the distribution and mean prediction with values on the same level and above fixed on values from observation.
 Then change in mean is calculeted and assigned to corresponding variables.
 
 A big dravback for this method is how the order of variable can influence the explaination outcome. This problems occurs most often as a result of existing interactions between variables as seen in OBRAZEK TODO
 
-OBRAZEK TODO
-
+![Break Down ordering impact](./img/ordering.png "Break Down ordering")
 Figure: Variables age and class interact with eachother so the changing order results in different plots
 
 #### Shap
 
 Shap is a direct responce to the biggest problem of Break Down method that is the ordering chosen for explaination could alter the results. Shap takes a nuber of permutation and calculates the average responce of Break Down on theese permutations. More permutations results in more stable explainations.
 
-OBRAZEK TODO
-
+![Break Down permutations](./img/shap_10_replicates.png "Break Down permutations")
 Figure: Different results of Break Down for 10 random variable orders
 
-OBRAZEK TODO
-
+![Shap](./img/shap_ordering.png "Shap")
 Figure: Shap output. Average impact calculeted with Break Down for 10 permutations
 
 #### Lime
 
 The essence of Lime is to locally approximate the black box model with a glass box one. Then we can use it for local explainations that should yeld results appropiate for the black box. Firstly we generate data "close" to our observation (also called Point of Interest) and make predictions with black box model. Based on those predictions wy try to fit the glass box model that acurately predicts those observations. In result we receive a glassbox model that should behave the same as original model as long as we ramain close to the Point of interest.
 
-OBRAZEK TODO
-
+![Lime](./img/lime_introduction.png "Lime")
 Figure: Colored areas correspond to different prediction for the black box model. Black cross is our Point of Interest and circles are generated data. The line represents our simpler model that approximates original model around Point of Interest
 
 This method is often used for datasets consisting of a large amount of variables. Methods like Break down and Shap come out short in theese situations.
@@ -82,21 +78,19 @@ This method is often used for datasets consisting of a large amount of variables
 
 Centris Paribus is a Latin phrase meaning "all else unchanged". This acuratly describes what it does. For the certain observation we take values that are interesting to us and observe how the prediction changes as we change values in those columns one at a time. This can yeld interesting conclusions about change in values and it's impact on predictions. 
 
-OBRAZEK TODO
-
+![Centris Paribus](./img/titanicCeterisProfile01E-1.png "Centris Paribus for different models")
 Figure: Shape of lines resebles the nature of the model. Dot shows value and model's prediction for the observation.
 
-OBRAZEK TODO
-
+![Centris Paribus](./img/titanicCeterisProfile01D-1.png "Centris Paribus for different observations")
 Figure: Centris Paribus shows different importance in variables and their changes for different observations
 
 Centris Paribus is very popular due to it's simplicity and interpretability. The biggest dravback however is it's possible unpredictable or missleading results. For example with fixed variable age set to 18 predicting outcome for a significant number of pregnancies doesn't make sense. It's also hard to interactions when working with variables separetly.
 
 ### Global
 
-#### Feature Importance
+As the name implies in global explainations we take a look at variables from the perspective of whole dataset. We can check the importance of variable for the model or analyse average impact of certain values on predictions.
 
-#### Triplot???
+#### Feature Importance
 
 #### Partial Dependence
 
