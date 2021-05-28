@@ -1,0 +1,9 @@
+glass box nie blackbox
+
+kazda tabela/ odniesienie ma przypis i odniesienie (nr)
+
+nie za głęboko sekcje
+
+bez skrótwów czasowników, kolokwializmów
+
+obrazki czytelne po przerenderowaniu na bookdown
