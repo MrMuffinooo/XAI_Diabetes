@@ -25,7 +25,7 @@ Research question?
 
 descriptions, distributions, missing data
 
-## Dataset versions (Martyna)
+## Dataset versions (Jung)
 
 original, naomit, mice, skip
 
@@ -118,7 +118,7 @@ Also referred as Accumulated-Local Dependence. It is the direct answer for corre
 
 # Results
 
-## Model comparison 
+## Model comparison (Martyna)
 
 ## Explanations results
 
@@ -128,7 +128,7 @@ Also referred as Accumulated-Local Dependence. It is the direct answer for corre
 
 # Discussion
 
-## Expert opions + comparison
+## Expert opions + comparison (Martyna)
 
 # Conclusion
 
