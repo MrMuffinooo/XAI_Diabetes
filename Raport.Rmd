@@ -60,7 +60,8 @@ Random Forest
 
 ## Explanations (Karol)
 
-In this section we will take time to investigate some model explanations that we will be using later. Feel free to use this chapter as reference for quick overview. For more in-depth knowledge please refer to https://ema.drwhy.ai/InstanceLevelExploration.html //bookdown?? TODO
+In this section we will take time to investigate some model explanations that we will be using later. Feel free to use this chapter as reference for quick overview. For more in-depth knowledge please refer to https://ema.drwhy.ai/InstanceLevelExploration.html. //bookdown?? TODO
+All images are also taken from the article.
 
 ### Local
 
@@ -188,6 +189,18 @@ Ada
 ### Local
 
 ![](./images/2-4-ceteris-paribus.png)
+
+![](./images/2-4-lime_190.png)
+
+![](./images/2-4-bd_190.png)
+
+![](./images/2-4-shap_190.png)
+
+![](./images/2-4-lime_214.png)
+
+![](./images/2-4-bd_214.png)
+
+![](./images/2-4-shap_214.png)
 
 # Discussion
 
