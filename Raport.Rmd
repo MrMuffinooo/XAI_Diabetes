@@ -60,7 +60,7 @@ Random Forest
 
 ## Explanations (Karol)
 
-In this section we will take time to investigate some model explanations that we will be using later. Feel free to use this chapter as reference for quick overview. For more in-depth information’s please refer to https://ema.drwhy.ai/InstanceLevelExploration.html //bookdown?? TODO
+In this section we will take time to investigate some model explanations that we will be using later. Feel free to use this chapter as reference for quick overview. For more in-depth knowledge please refer to https://ema.drwhy.ai/InstanceLevelExploration.html //bookdown?? TODO
 
 ### Local
 
@@ -68,7 +68,7 @@ Local explanations allow us to better understand model's prediction from the lev
 
 #### Break Down
 
-In this explanation all observations start from the same base that is the mean prediction for all data. Next steps consist of fixing consecutive variables on values from the observation in question and measuring the change in mean prediction that is now calculated with some of the values fixed. This shift in mean prediction is interpreted as the impact of this variable's value on prediction for this observation.
+In this explanation all observations start from the same base that is the mean prediction for all data. Next steps consist of fixing consecutive variables on values from the observation in question and measuring the change in mean prediction that is now calculated with some of the values fixed. This shift in mean prediction is interpreted as the impact of this variable's value on prediction for this observation. Figure TODO shows the corresponding steps.
 
 
 ![Break Down algorythm](./images/2-4-break_down_distr.png "Break Down algorythm")
@@ -82,7 +82,7 @@ Figure: Variables age and class interact with each other so the changing order r
 
 #### Shap
 
-Shap is a direct response to the biggest problem of Break Down method that is the ordering chosen for explanation could alter the results. Shap takes a number of permutation and calculates the average response of Break Down on these permutations. More permutations result in more stable explanations.
+Shap is a direct response to the biggest problem of Break Down method that is the ordering chosen for explanation could alter the results as seen in figure TODO. Shap takes a number of permutation and calculates the average response of Break Down on these permutations. More permutations result in more stable explanations. Exemplary output is shown in figure TODO.
 
 ![Break Down permutations](./images/2-4-shap_10_replicates.png "Break Down permutations")
 Figure: Different results of Break Down for 10 random variable orders
@@ -92,7 +92,7 @@ Figure: Shap output. Average impact calculated with Break Down for 10 permutatio
 
 #### Lime
 
-The essence of Lime is to locally approximate the black box model with a glass box one. Then we can use it for local explanations that should yield results appropriate for the black box. Firstly, we generate data "close" to our observation (also called Point of Interest) and make predictions with black box model. Based on those predictions we try to fit the glass box model that accurately predicts those observations. In result we receive a glass box model that should behave the same as original model as long as we remain close to the Point of interest.
+The essence of Lime is to locally approximate the black box model with a glass box one. Then we can use it for local explanations that should yield results appropriate for the black box. Firstly, we generate data "close" to our observation (also called Point of Interest) and make predictions with black box model. Based on those predictions we try to fit the glass box model that accurately predicts those observations. In result we receive a glass box model that should behave the same as original model as long as we remain close to the Point of interest. Figure TODO describes the idea.
 
 ![Lime](./images/2-4-lime_introduction.png "Lime")
 Figure: Colored areas correspond to different prediction for the black box model. Black cross is our Point of Interest and circles are generated data. The line represents our simpler model that approximates original model around Point of Interest
@@ -101,7 +101,7 @@ This method is often used for datasets consisting of many variables. Methods lik
 
 #### Ceteris Paribus
 
-Ceteris Paribus is a Latin phrase meaning "all else unchanged". This accurately describes what it does. For the certain observation we take values that are interesting to us and observe how the prediction changes as we change values in those columns one at a time. This can yield interesting conclusions about change in values and its impact on predictions. 
+Ceteris Paribus is a Latin phrase meaning "all else unchanged". This accurately describes what it does. For the certain observation we take values that are interesting to us and observe how the prediction changes as we change values in those columns one at a time. This can yield interesting conclusions about change in values and its impact on predictions. Figures TODO and TODO show prediction change as responce for variable change.
 
 ![Ceteris Paribus](./images/2-4-titanicCeterisProfile01E-1.png "Ceteris Paribus for different models")
 Figure: Shape of lines resebles the nature of the model. Dot shows value and model's prediction for the observation.
@@ -117,19 +117,19 @@ As the name implies in global explanations we look at variables from the perspec
 
 #### Feature Importance
 
-The main idea behind Feature Importance is measuring how important each variable is for model's predictions. To do that we measure the change in AUC after permutating values of each variable. The bigger the change, the bigger importance of variable. To stabilize the results, we can measure average change for a number of permutations.
+The main idea behind Feature Importance is measuring how important each variable is for model's predictions. To do that we measure the change in AUC after permutating values of each variable. The bigger the change, the bigger importance of variable. To stabilize the results, we can measure average change for a number of permutations. In figure TODO we can see that variable gender is the most important for model's prediction.
 
 ![Feature Importance](./images/2-4-TitanicRFFeatImp10-1.png "Feature Importance for 10 permutations")
 Figure: Feature Importance output for 10 permutations
 
 #### Partial Dependence
 
-To put it short, Partial Dependence is the average of Ceteris Paribus for whole data. This results in average importance and impact of variable and its values.
+To put it short, Partial Dependence is the average of Ceteris Paribus for whole data. This results in average importance and impact of variable and its values. The similarities can be observed in figure TODO
 
 ![Partial Dependence](./images/2-4-pdpIntuition-1.png "Ceteris Paribus and Partial Dependence relation")
 Figure: Multiple observations with Ceteris Paribus and their average as Partial Dependence
 
-As we can see observations can return different shapes for Ceteris Paribus, hence averaging them could mean loss of information. To answer this problem Partial Dependence implements grouping and clustering that could show the difference.
+As we can see observations can return different shapes for Ceteris Paribus, hence averaging them could mean loss of information. To answer this problem Partial Dependence implements grouping and clustering that could show the difference as shown in figure TODO.
 
 ![Partial Dependence](./images/2-4-pdpPart5-1.png "Ceteris Paribus grouped by sex")
 Figure: Partial Dependence grouped by sex
