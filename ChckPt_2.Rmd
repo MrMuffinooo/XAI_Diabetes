@@ -110,10 +110,26 @@ pdp_4$agr_profiles$`_label_` <- "pdp"
 plot(pdp_4,ale_4)
 ```
 
+```{r}
+pdp_ale_plas<-plot(pdp_4, ale_4)
+png("images/2-4-pdp-ale-plas.png")
+grid.arrange(pdp_ale_plas)
+dev.off()
+
+```
+
 ```{r, fig.height=6, fig.width=9}
 pdp_5 <- model_profile(explainer, variables = "mass")
 ale_5 <- model_profile(explainer, variables = "mass",type="accumulated")
 ale_5$agr_profiles$`_label_` <- "ale"
 pdp_5$agr_profiles$`_label_` <- "pdp"
 plot(pdp_5,ale_5)
+```
+
+```{r}
+pdp_ale_mass<-plot(pdp_5, ale_5)
+png("images/2-4-pdp-ale-mass.png")
+grid.arrange(pdp_ale_mass)
+dev.off()
+
 ```

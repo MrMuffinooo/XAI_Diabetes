@@ -21,6 +21,9 @@ library(knitr)
 library(naniar)
 library(visdat)
 library(mice)
+library(ggplot2)
+library(gridExtra)
+library(ranger)
 
 set.seed(13)
 
@@ -111,13 +114,13 @@ ggplot(data = diabetes_cor, aes(x=Var1, y=Var2, fill=value)) +
 
 ```{r message=FALSE}
 m <- sample(1:nrow(diabetes), 0.7*nrow(diabetes))
-diabetes_train <- diabetes[m,]
-diabetes_test <- diabetes[-m,]
-diabetes_train$class <- as.factor(diabetes_train$class)
-classif_task <- makeClassifTask(id = "lvr", data = diabetes_train, target = "class")
+diabetes_train_original <- diabetes[m,]
+diabetes_test_original <- diabetes[-m,]
+diabetes_train$class <- as.factor(diabetes_train_original$class)
+classif_task <- makeClassifTask(id = "lvr", data = diabetes_train_original, target = "class")
 classif_lrn <- makeLearner("classif.ranger", predict.type = "prob")
 model <- mlr::train(classif_lrn, classif_task)
-pred_test <- predict(model, newdata = diabetes_test)$data$prob.0
+pred_test <- predict(model, newdata = diabetes_test_original)$data$prob.0
 roc <- roc(diabetes_test$class, pred_test)
 roc$auc
 plot(roc)
@@ -129,8 +132,8 @@ AUC: 0,8261
 
 ```{r}
 m <- sample(1:nrow(diabetes_NA), 0.7*nrow(diabetes_NA))
-diabetes_train_NA <- diabetes_NA[m,]
-diabetes_test_NA <- diabetes_NA[-m,]
+diabetes_train <- diabetes_NA[m,]
+diabetes_test<- diabetes_NA[-m,]
 ```
 
 ### Omitting missing data
@@ -174,7 +177,7 @@ imp_train2 <- mice(diabetes_train_skip, method = "pmm", m = 1, maxit = 1, nnet.M
 diabetes_train_skip <- mice::complete(imp_train2)
 
 #test
-diabetes_test_skip<-diabetes_test_NA[,-c(3,4,5)]
+diabetes_test_skip<-diabetes_test[,-c(3,4,5)]
 imp_test2 <- mice(diabetes_test_skip, method = "pmm", m = 1, maxit = 1, nnet.MaxNWts=3000)
 diabetes_test_skip <- mice::complete(imp_test2)
 
@@ -193,12 +196,12 @@ train_datasets<-list()
 train_datasets[[1]]<-diabetes_train_naomit
 train_datasets[[2]]<-diabetes_train_mice
 train_datasets[[3]]<-diabetes_train_skip
-train_datasets[[4]]<-diabetes_train
+train_datasets[[4]]<-diabetes_train_original
 test_datasets<-list()
 test_datasets[[1]]<-diabetes_test_naomit
 test_datasets[[2]]<-diabetes_test_mice
 test_datasets[[3]]<-diabetes_test_skip
-test_datasets[[4]]<-diabetes_test
+test_datasets[[4]]<-diabetes_test_original
 auc<-c(0,0,0,0)
 FNR<-c(0,0,0,0)
 BAC<-c(0,0,0,0)
@@ -261,7 +264,7 @@ for (i in 1:length(classifiers)){
                        negative="0",
                        positive = "1")
 
-    FNR[i] <- measureFNR(pred_test$truth,
+    FNR[i] <- measureFPR(pred_test$truth,
                        pred_test$response,
                        negative="0",
                        positive = "1")
@@ -270,11 +273,13 @@ for (i in 1:length(classifiers)){
     
 }  
 
-res<-data.frame(AUC=AUC, FalseNegativeRate=FNR, BalancedAccuracy=BAC)
+res<-data.frame(AUC=AUC, BalancedAccuracy=BAC, FalseNegativeRate=FNR)
 row.names(res)<-c("Ranger", "Ada", "Binomial", "GBM","Naive Bayes","Random forest")
 res
-
-
+#png("img\results_skip.png")
+#p<-tableGrob(res)
+#grid.arrange(p)
+#dev.off()
 ```
 
 ## Data Original
@@ -287,18 +292,18 @@ BAC<-c(0,0,0,0,0)
 
 classifiers=c("classif.ranger", "classif.ada", "classif.binomial", "classif.gbm", "classif.naiveBayes", "classif.randomForest")
 
-classif_task <- makeClassifTask(id = "lvr", data = diabetes_train, target = "class")
+classif_task <- makeClassifTask(id = "lvr", data = diabetes_train_original, target = "class")
 
 for (i in 1:length(classifiers)){
     classif_lrn <- makeLearner(classifiers[i], predict.type = "prob")
     model <- mlr::train(classif_lrn, classif_task)
-    pred_test <- predict(model, newdata = diabetes_test)$data
+    pred_test <- predict(model, newdata = diabetes_test_original)$data
     AUC[i] <- measureAUC(probabilities = pred_test$prob.1,
                        truth = pred_test$truth,
                        negative="0",
                        positive = "1")
 
-    FNR[i] <- measureFNR(pred_test$truth,
+    FNR[i] <- measureFPR(pred_test$truth,
                        pred_test$response,
                        negative="0",
                        positive = "1")
@@ -307,10 +312,13 @@ for (i in 1:length(classifiers)){
     
 }  
 
-res<-data.frame(AUC=AUC, FalseNegativeRate=FNR, BalancedAccuracy=BAC)
+res<-data.frame(AUC=AUC, BalancedAccuracy=BAC, FalseNegativeRate=FNR)
 row.names(res)<-c("Ranger", "Ada", "Binomial", "GBM","Naive Bayes","Random forest")
 res
-
+#png("img\results_original.png")
+#p<-tableGrob(res)
+#grid.arrange(p)
+#dev.off()
 
 ```
 
@@ -321,12 +329,12 @@ res
 boxplot(diabetes$mass, horizontal = TRUE)
 mean(diabetes$mass)
 
-# library(ggplot2) 
-# diabetes_skip<-rbind(diabetes_train_skip, diabetes_test_skip)
-# ggplot(diabetes_skip, aes(x=mass)) + 
-#   geom_boxplot(fill="darkred")+
-#   xlim(-0.2,0.2)
-#   theme_minimal()
+library(ggplot2)
+diabetes_skip<-rbind(diabetes_train_skip, diabetes_test_skip)
+ggplot(diabetes_skip, aes(x=mass)) +
+  geom_boxplot(fill="#99d8c9")+
+  xlim(-0.2,0.2)
+  theme_minimal()
 ```
 
 ![BMI chart](BMI_chart.jfif)
@@ -334,15 +342,16 @@ mean(diabetes$mass)
 ### Model ranger
 
 ```{r}
-model_random_skip_ranger <- ranger::ranger(class~., data = diabetes_train_skip, classification = TRUE, probability = TRUE, num.trees=776, mtry=1, min.node.size=8, splitrule="extratrees")
+# model_random_skip_ranger <- ranger::ranger(class~., data = diabetes_train_skip, classification = TRUE, probability = TRUE, num.trees=776, mtry=1, min.node.size=8, splitrule="extratrees")
+ 
+samp <- c(140,190,202,214,74)
 
-samp <- sample(1:231, 5)
-explainer <- explain(id= 'ranger', model = model_random_skip_ranger,
+classif_task <- makeClassifTask(id = "ranger_tune_random", data = diabetes_train_skip, target = "class")
+classif_lrn <- makeLearner("classif.ranger", predict.type = "prob", par.vals = list(num.trees=776, mtry=1, min.node.size=8, splitrule="extratrees"))
+model_random_skip_ranger<- mlr::train(classif_lrn, classif_task)
+explainer <- explain(id= 'Ranger', label="Ranger", model = model_random_skip_ranger,
                      data = diabetes_test_skip[,-6],
              y = as.numeric(as.character(diabetes_test_skip$class)))
-
-cp_profile_1 <- predict_profile(explainer, diabetes_test_skip[samp,-6])
-plot(cp_profile_1, color = "_ids_")
 
 ```
 
@@ -352,11 +361,58 @@ plot(cp_profile_1, color = "_ids_")
 classif_task <- makeClassifTask(id = "ada_tune_random", data = diabetes_train_skip, target = "class")
 classif_lrn <- makeLearner("classif.ada", predict.type = "prob", par.vals = list(loss='logistic', type='discrete', iter=81, max.iter=3, minsplit=45, minbucket=4, maxdepth=1))
 model_random_skip_ada<- mlr::train(classif_lrn, classif_task)
-explainer_ada <- explain(id='Ada', model = model_random_skip_ada,
+explainer_ada <- explain(id='Ada',label="Ada", model = model_random_skip_ada,
                      data = diabetes_test_skip[,-6],
              y = as.numeric(as.character(diabetes_test_skip$class)))
 
 ```
+
+
+```{r message=FALSE, echo=FALSE}
+
+AUC<-c(0,0)
+FNR<-c(0,0)
+BAC<-c(0,0)
+
+models<-list()
+models[[1]]<-model_random_skip_ranger
+models[[2]]<-model_random_skip_ada
+
+for (i in 1:length(models)){
+    model<-models[[i]]
+    pred_test <- predict(model, newdata = diabetes_test_skip)$data
+    AUC[i] <- measureAUC(probabilities = pred_test$prob.1,
+                       truth = pred_test$truth,
+                       negative="0",
+                       positive = "1")
+
+    FNR[i] <- measureFPR(pred_test$truth,
+                       pred_test$response,
+                       negative="0",
+                       positive = "1")
+    BAC[i] <- measureBAC(pred_test$truth,
+                       pred_test$response)
+    
+}  
+
+res<-data.frame(AUC=AUC, BalancedAccuracy=BAC, FalseNegativeRate=FNR)
+row.names(res)<-c("Tuned Ranger", "Tuned Ada")
+res
+#png("img\results_tuned.png")
+#p<-tableGrob(res)
+#grid.arrange(p)
+#dev.off()
+```
+
+```{r}
+cp_profile_1 <- predict_profile(explainer, diabetes_test_skip[samp,-6])
+ceteris_paribus<-plot(cp_profile_1, color = "_ids_")
+png("images/2-4-ceteris-paribus.png")
+grid.arrange(ceteris_paribus)
+dev.off()
+
+```
+
 
 ```{r}
 model_type.dalex_explainer <- DALEXtra::model_type.dalex_explainer
@@ -370,7 +426,9 @@ lime_ranger1 <- predict_surrogate(
   type = "lime")
 
 plot(lime_ranger1)
+
 ```
+
 ```{r}
 pp_bd_1 <- predict_parts(explainer, new_observation = diabetes_test_skip[samp[1], -6], type = "break_down")
 plot(pp_bd_1)
@@ -378,7 +436,7 @@ plot(pp_bd_1)
 
 
 ```{r}
-pp_shap_1 <- predict_parts(explainer, new_observation = diabetes_test_skip[samp[1], -6], type = "shap", B = 5)
+pp_shap_1 <- predict_parts(explainer, new_observation = diabetes_test_skip[samp[2], -6], type = "shap", B = 5)
 plot(pp_shap_1)
 ```
 
@@ -428,9 +486,18 @@ plot(pp_shap_1)
 ```{r}
 fi_1 <- model_parts(explainer, B = 10)
 fi_2 <- model_parts(explainer_ada, B = 10)
+#fi_1$label<-"ranger"
+#fi_2$label<-"ada"
 plot(fi_1, fi_2)
 ```
 
+```{r}
+variable_importance<-plot(fi_1, fi_2)
+png("images/variable_importance.png")
+grid.arrange(variable_importance)
+dev.off()
+
+```
 ### Average influence on prediction
 
 ```{r, fig.height=6, fig.width=9}
@@ -438,6 +505,13 @@ pdp_1 <- model_profile(explainer)
 pdp_2 <- model_profile(explainer_ada)
 
 plot(pdp_1, pdp_2)
+```
+```{r}
+pdp<-plot(pdp_1, pdp_2)
+png("images/2-4-pdp.png")
+grid.arrange(pdp)
+dev.off()
+
 ```
 
 ```{r, fig.height=6, fig.width=9}
@@ -459,6 +533,8 @@ ale_2 <- model_profile(explainer_ada,type="accumulated")
 
 plot(ale_1, ale_2)
 ```
+
+
 ```{r, fig.height=6, fig.width=9}
 ale_3 <- model_profile(explainer,k=2,type="accumulated")
 ale_4 <- model_profile(explainer_ada,k=2,type="accumulated")

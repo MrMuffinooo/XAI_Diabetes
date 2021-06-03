@@ -29,9 +29,34 @@ descriptions, distributions, missing data
 
 original, naomit, mice, skip
 
+## Measures
+
+AUC, BAlanced Accuracy and False Negative Rate
+
 ## Models (Martyna)
 
-ranger, ada
+To identify the models, that could potentially be efficient classificators on this dataset, we measured the AUC, BAlanced Accuracy and False Negative Rate measures on 6 different classification models from `mlr` package:
+
+
+### Ranger - 
+Random regression forest
+
+### Adaboost 
+Adaptive Boosting
+
+### Binomial
+Binomial Regression
+
+### GBM
+Gradient Boosting Machine
+
+### Naive Bayes
+Naive Bayes
+
+### Random Forest
+Random Forest
+
+
 
 ## Explanations (Karol)
 
@@ -120,11 +145,49 @@ Also referred as Accumulated-Local Dependence. It is the direct answer for corre
 
 ## Model comparison (Martyna)
 
+The models were checked on both `original` and `skip` dataset version, with the following results:
+
+### Data Original
+![](./img/results_original.png)
+
+The measure values between models are very similar, however, 
+
+### Data Skip
+![](./img/results_skip.png)
+
+Based on the results, two models: Ranger and Ada where chosen for further analysis. Hyperparamether tuning using random grid search was peformed, resulting in classificators with the following values:
+
+
+Ranger
+ - num.trees=776, 
+ - mtry=1,
+ - min.node.size=8
+ - splitrule="extratrees"
+ 
+Ada
+ - loss='logistic'
+ - type='discrete',
+ - iter=81,
+ - max.iter=3,
+ - minsplit=45, 
+ - minbucket=4, 
+ - maxdepth=1
+ 
+
 ## Explanations results
 
 ### Global
 
+#### Variable Importance
+
+![](./images/2-4-variable-importance.png)
+![](./images/2-4-pdp.png)
+
+![](./images/2-4-pdp-ale-mass.png)
+
 ### Local
+
+![](./images/2-4-ceteris-paribus.png)
 
 # Discussion
 
