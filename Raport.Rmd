@@ -181,10 +181,31 @@ Ada
 
 #### Variable Importance
 
+Figure TODO shows Feature Importance for booth Ada and Ranger models. As we can see, booth aggree with eachother as to what variables are most important to them. Their predictions are mostly based on the values of *plas* variable and then *mass* and *age* come second.
+
 ![](./images/2-4-variable-importance.png)
+
+Figure: Variable importance for Ada and Ranger based on AUC loss after permutations.
+
+#### Partial Dependence Profile
+
+Partial Dependence profile seen in figure TODO give us perhaps the most interesting results. Firstly, they are adequate to Feature importance in Figure TODO. The more important variables return wider range of average prediction and less important give less varied predictions respectively. Secondly, we can observe the difference in model's inner characteristics based on the shape of their's PDP functions. Ada is more edgy and straight while ranger more smooth. 
+Based on results yielded by PDP and acording to these two models we can conclude that, generally speaking the bigger the values the higher the chance of positive Diabetes test result.
+
+Some other key observations include: 
+
+* Little to none impact by change of _age_ after 35 years of living.
+* A sudden increase in prediction with _mass_ reaching 30 being the border of obesity in BMI model.
+* Almost no change for ada prediction with change of _pedi_.
+* A big increase in prediction with 7th pregnancy.
+
 ![](./images/2-4-pdp.png)
 
+Figure: Average predictions with PDP for ada and ranger
+
 ![](./images/2-4-pdp-ale-mass.png)
+
+Figure: Partial dependence and acumulated dependence on ranger's mass variable
 
 ### Local
 
