@@ -79,8 +79,8 @@ Random Forest
 
 ## Explanations (Karol)
 
-In this section we will take time to investigate some model explanations that we will be using later. Feel free to use this chapter as reference for quick overview. For more in-depth knowledge please refer to https://ema.drwhy.ai/InstanceLevelExploration.html. //bookdown?? TODO
-All images are also taken from the article.
+In this section we will take time to investigate some model explanations that we will be using later. Feel free to use this chapter as reference for quick overview. For more in-depth knowledge please refer to paper [_Explanatory Model Analysis_](https://ema.drwhy.ai/InstanceLevelExploration.html) [1] by professor Biecek. //bookdown?? TODO
+All images in this section are also taken from this article.
 
 ### Local
 
@@ -291,6 +291,8 @@ Since all the women in the dataset have the same **ethnicity**, it is not a fact
 
 # References
 
-- https://www.niddk.nih.gov/health-information/diabetes/overview/symptoms-causes#causes
+[1] https://ema.drwhy.ai/InstanceLevelExploration.html
 
-- https://www.nia.nih.gov/health/diabetes-older-people
+[2] https://www.niddk.nih.gov/health-information/diabetes/overview/symptoms-causes#causes
+
+[3] https://www.nia.nih.gov/health/diabetes-older-people
