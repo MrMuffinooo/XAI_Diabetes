@@ -79,7 +79,8 @@ Random Forest
 
 ## Explanations (Karol)
 
-In this section we will take time to investigate some model explanations that we will be using later. Feel free to use this chapter as reference for quick overview. For more in-depth information’s please refer to https://ema.drwhy.ai/InstanceLevelExploration.html //bookdown?? TODO
+In this section we will take time to investigate some model explanations that we will be using later. Feel free to use this chapter as reference for quick overview. For more in-depth knowledge please refer to https://ema.drwhy.ai/InstanceLevelExploration.html. //bookdown?? TODO
+All images are also taken from the article.
 
 ### Local
 
@@ -87,45 +88,71 @@ Local explanations allow us to better understand model's prediction from the lev
 
 #### Break Down
 
-In this explanation all observations start from the same base that is the mean prediction for all data. Next steps consist of fixing consecutive variables on values from the observation in question and measuring the change in mean prediction that is now calculated with some of the values fixed. This shift in mean prediction is interpreted as the impact of this variable's value on prediction for this observation.
+In this explanation all observations start from the same base that is the mean prediction for all data. Next steps consist of fixing consecutive variables on values from the observation in question and measuring the change in mean prediction that is now calculated with some of the values fixed. This shift in mean prediction is interpreted as the impact of this variable's value on prediction for this observation. Figure TODO shows the corresponding steps.
 
 
+<<<<<<< HEAD
 ![Break Down algorythm](./images/break_down_distr.png "Break Down algorythm")
+=======
+![Break Down algorythm](./images/2-4-break_down_distr.png "Break Down algorythm")
+>>>>>>> 61131dcf16999e9dc6c95c1c30c9befb58cc261c
 Figure: Panel A shows the distribution and mean prediction with values on the same level and above fixed on values from observation.
 Then change in mean is calculated and assigned to corresponding variables.
 
 A big drawback for this method is how the order of variable can influence the explanation outcome. This problem occurs most often as a result of existing interactions between variables as seen in OBRAZEK TODO
 
+<<<<<<< HEAD
 ![Break Down ordering impact](./images/ordering.png "Break Down ordering")
+=======
+![Break Down ordering impact](./images/2-4-ordering.png "Break Down ordering")
+>>>>>>> 61131dcf16999e9dc6c95c1c30c9befb58cc261c
 Figure: Variables age and class interact with each other so the changing order results in different plots
 
 #### Shap
 
-Shap is a direct response to the biggest problem of Break Down method that is the ordering chosen for explanation could alter the results. Shap takes a number of permutation and calculates the average response of Break Down on these permutations. More permutations result in more stable explanations.
+Shap is a direct response to the biggest problem of Break Down method that is the ordering chosen for explanation could alter the results as seen in figure TODO. Shap takes a number of permutation and calculates the average response of Break Down on these permutations. More permutations result in more stable explanations. Exemplary output is shown in figure TODO.
 
+<<<<<<< HEAD
 ![Break Down permutations](./images/shap_10_replicates.png "Break Down permutations")
 Figure: Different results of Break Down for 10 random variable orders
 
 ![Shap](./images/shap_ordering.png "Shap")
+=======
+![Break Down permutations](./images/2-4-shap_10_replicates.png "Break Down permutations")
+Figure: Different results of Break Down for 10 random variable orders
+
+![Shap](./images/2-4-shap_ordering.png "Shap")
+>>>>>>> 61131dcf16999e9dc6c95c1c30c9befb58cc261c
 Figure: Shap output. Average impact calculated with Break Down for 10 permutations
 
 #### Lime
 
-The essence of Lime is to locally approximate the black box model with a glass box one. Then we can use it for local explanations that should yield results appropriate for the black box. Firstly, we generate data "close" to our observation (also called Point of Interest) and make predictions with black box model. Based on those predictions we try to fit the glass box model that accurately predicts those observations. In result we receive a glass box model that should behave the same as original model as long as we remain close to the Point of interest.
+The essence of Lime is to locally approximate the black box model with a glass box one. Then we can use it for local explanations that should yield results appropriate for the black box. Firstly, we generate data "close" to our observation (also called Point of Interest) and make predictions with black box model. Based on those predictions we try to fit the glass box model that accurately predicts those observations. In result we receive a glass box model that should behave the same as original model as long as we remain close to the Point of interest. Figure TODO describes the idea.
 
+<<<<<<< HEAD
 ![Lime](./images/lime_introduction.png "Lime")
+=======
+![Lime](./images/2-4-lime_introduction.png "Lime")
+>>>>>>> 61131dcf16999e9dc6c95c1c30c9befb58cc261c
 Figure: Colored areas correspond to different prediction for the black box model. Black cross is our Point of Interest and circles are generated data. The line represents our simpler model that approximates original model around Point of Interest
 
 This method is often used for datasets consisting of many variables. Methods like Break down and Shap come out short in these situations.
 
 #### Ceteris Paribus
 
-Ceteris Paribus is a Latin phrase meaning "all else unchanged". This accurately describes what it does. For the certain observation we take values that are interesting to us and observe how the prediction changes as we change values in those columns one at a time. This can yield interesting conclusions about change in values and its impact on predictions. 
+Ceteris Paribus is a Latin phrase meaning "all else unchanged". This accurately describes what it does. For the certain observation we take values that are interesting to us and observe how the prediction changes as we change values in those columns one at a time. This can yield interesting conclusions about change in values and its impact on predictions. Figures TODO and TODO show prediction change as responce for variable change.
 
+<<<<<<< HEAD
 ![Ceteris Paribus](./images/titanicCeterisProfile01E-1.png "Ceteris Paribus for different models")
 Figure: Shape of lines resebles the nature of the model. Dot shows value and model's prediction for the observation.
 
 ![Ceteris Paribus](./images/titanicCeterisProfile01D-1.png "Ceteris Paribus for different observations")
+=======
+![Ceteris Paribus](./images/2-4-titanicCeterisProfile01E-1.png "Ceteris Paribus for different models")
+Figure: Shape of lines resebles the nature of the model. Dot shows value and model's prediction for the observation.
+
+![Ceteris Paribus](./images/2-4-titanicCeterisProfile01D-1.png "Ceteris Paribus for different observations")
+>>>>>>> 61131dcf16999e9dc6c95c1c30c9befb58cc261c
 Figure: Ceteris Paribus shows different importance in variables and their changes for different observations
 
 Ceteris Paribus is very popular due to its simplicity and interpretability. The biggest drawback however is the possibility of unpredictable or misleading results. For example, with fixed variable age set to 18, predicting outcome for a significant number of pregnancies does not make sense. It is also hard to capture interactions when working with variables separately.
@@ -136,21 +163,33 @@ As the name implies in global explanations we look at variables from the perspec
 
 #### Feature Importance
 
-The main idea behind Feature Importance is measuring how important each variable is for model's predictions. To do that we measure the change in AUC after permutating values of each variable. The bigger the change, the bigger importance of variable. To stabilize the results, we can measure average change for a number of permutations.
+The main idea behind Feature Importance is measuring how important each variable is for model's predictions. To do that we measure the change in AUC after permutating values of each variable. The bigger the change, the bigger importance of variable. To stabilize the results, we can measure average change for a number of permutations. In figure TODO we can see that variable gender is the most important for model's prediction.
 
+<<<<<<< HEAD
 ![Feature Importance](./images/TitanicRFFeatImp10-1.png "Feature Importance for 10 permutations")
+=======
+![Feature Importance](./images/2-4-TitanicRFFeatImp10-1.png "Feature Importance for 10 permutations")
+>>>>>>> 61131dcf16999e9dc6c95c1c30c9befb58cc261c
 Figure: Feature Importance output for 10 permutations
 
 #### Partial Dependence
 
-To put it short, Partial Dependence is the average of Ceteris Paribus for whole data. This results in average importance and impact of variable and its values.
+To put it short, Partial Dependence is the average of Ceteris Paribus for whole data. This results in average importance and impact of variable and its values. The similarities can be observed in figure TODO
 
+<<<<<<< HEAD
 ![Partial Dependence](./images/pdpIntuition-1.png "Ceteris Paribus and Partial Dependence relation")
+=======
+![Partial Dependence](./images/2-4-pdpIntuition-1.png "Ceteris Paribus and Partial Dependence relation")
+>>>>>>> 61131dcf16999e9dc6c95c1c30c9befb58cc261c
 Figure: Multiple observations with Ceteris Paribus and their average as Partial Dependence
 
-As we can see observations can return different shapes for Ceteris Paribus, hence averaging them could mean loss of information. To answer this problem Partial Dependence implements grouping and clustering that could show the difference.
+As we can see observations can return different shapes for Ceteris Paribus, hence averaging them could mean loss of information. To answer this problem Partial Dependence implements grouping and clustering that could show the difference as shown in figure TODO.
 
+<<<<<<< HEAD
 ![Partial Dependence](./images/pdpPart5-1.png "Ceteris Paribus grouped by sex")
+=======
+![Partial Dependence](./images/2-4-pdpPart5-1.png "Ceteris Paribus grouped by sex")
+>>>>>>> 61131dcf16999e9dc6c95c1c30c9befb58cc261c
 Figure: Partial Dependence grouped by sex
 
 As in Ceteris Paribus this method is very simple and understandable. However, it also carries over the same problems resulting from correlated variables.
@@ -167,10 +206,19 @@ Also referred as Accumulated-Local Dependence. It is the direct answer for corre
 The models were checked on both `original` and `skip` dataset version, with the following results:
 
 ### Data Original
+<<<<<<< HEAD
 ![](./images/2-4-data-original.png)
 
 ### Data Skip
 ![](./images/2-4-data-skip.png)
+=======
+![](./images/2-4-results_original.png)
+
+The measure values between models are very similar, however, 
+
+### Data Skip
+![](./images/2-4-results_skip.png)
+>>>>>>> 61131dcf16999e9dc6c95c1c30c9befb58cc261c
 
 Based on the results, two models: Ranger and Ada where chosen for further analysis. Hyperparamether tuning using random grid search was peformed, resulting in classificators with the following values:
 
@@ -198,14 +246,47 @@ Based on the results, two models: Ranger and Ada where chosen for further analys
 
 #### Variable Importance
 
+Figure TODO shows Feature Importance for booth Ada and Ranger models. As we can see, booth aggree with eachother as to what variables are most important to them. Their predictions are mostly based on the values of *plas* variable and then *mass* and *age* come second.
+
 ![](./images/2-4-variable-importance.png)
+
+Figure: Variable importance for Ada and Ranger based on AUC loss after permutations.
+
+#### Partial Dependence Profile
+
+Partial Dependence profile seen in figure TODO give us perhaps the most interesting results. Firstly, they are adequate to Feature importance in Figure TODO. The more important variables return wider range of average prediction and less important give less varied predictions respectively. Secondly, we can observe the difference in model's inner characteristics based on the shape of their's PDP functions. Ada is more edgy and straight while ranger more smooth. 
+Based on results yielded by PDP and acording to these two models we can conclude that, generally speaking the bigger the values the higher the chance of positive Diabetes test result.
+
+Some other key observations include: 
+
+* Little to none impact by change of _age_ after 35 years of living.
+* A sudden increase in prediction with _mass_ reaching 30 being the border of obesity in BMI model.
+* Almost no change for ada prediction with change of _pedi_.
+* A big increase in prediction with 7th pregnancy.
+
 ![](./images/2-4-pdp.png)
 
+Figure: Average predictions with PDP for ada and ranger
+
 ![](./images/2-4-pdp-ale-mass.png)
+
+Figure: Partial dependence and acumulated dependence on ranger's mass variable
 
 ### Local
 
 ![](./images/2-4-ceteris-paribus.png)
+
+![](./images/2-4-lime_190.png)
+
+![](./images/2-4-bd_190.png)
+
+![](./images/2-4-shap_190.png)
+
+![](./images/2-4-lime_214.png)
+
+![](./images/2-4-bd_214.png)
+
+![](./images/2-4-shap_214.png)
 
 # Discussion
 

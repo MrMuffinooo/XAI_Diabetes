@@ -418,10 +418,10 @@ res
 
 ```{r}
 cp_profile_1 <- predict_profile(explainer, diabetes_test_skip[samp,-6])
-ceteris_paribus<-plot(cp_profile_1, color = "_ids_")
-png("images/2-4-ceteris-paribus.png")
-grid.arrange(ceteris_paribus)
-dev.off()
+plot(cp_profile_1, color = "_ids_")
+#png("images/2-4-ceteris-paribus.png")
+#grid.arrange(ceteris_paribus)
+#dev.off()
 
 ```
 
@@ -432,13 +432,39 @@ predict_model.dalex_explainer <- DALEXtra::predict_model.dalex_explainer
 
 lime_ranger1 <- predict_surrogate(
   explainer = explainer,
-  new_observation = diabetes_test_skip[samp[1], -6], 
+  new_observation = diabetes_test_skip[samp[2], -6], 
   n_features = 3, 
   n_permutations = 1000,
   type = "lime")
 
 plot(lime_ranger1)
 
+```
+```{r}
+p<-plot(lime_ranger1)
+png("images/2-4-lime_190.png")
+grid.arrange(p)
+dev.off()
+```
+```{r}
+model_type.dalex_explainer <- DALEXtra::model_type.dalex_explainer
+predict_model.dalex_explainer <- DALEXtra::predict_model.dalex_explainer
+
+lime_ranger1 <- predict_surrogate(
+  explainer = explainer,
+  new_observation = diabetes_test_skip[samp[4], -6], 
+  n_features = 3, 
+  n_permutations = 1000,
+  type = "lime")
+
+plot(lime_ranger1)
+
+```
+```{r}
+p<-plot(lime_ranger1)
+png("images/2-4-lime_214.png")
+grid.arrange(p)
+dev.off()
 ```
 
 ```{r}
@@ -448,7 +474,7 @@ plot(pp_bd_1)
 
 
 ```{r}
-pp_shap_1 <- predict_parts(explainer, new_observation = diabetes_test_skip[samp[2], -6], type = "shap", B = 5)
+pp_shap_1 <- predict_parts(explainer, new_observation = diabetes_test_skip[samp[1], -6], type = "shap", B = 5)
 plot(pp_shap_1)
 ```
 
@@ -456,12 +482,22 @@ plot(pp_shap_1)
 pp_bd_1 <- predict_parts(explainer, new_observation = diabetes_test_skip[samp[2], -6], type = "break_down")
 plot(pp_bd_1)
 ```
-
+```{r}
+p<-plot(pp_bd_1)
+png("images/2-4-bd_190.png")
+grid.arrange(p)
+dev.off()
+```
 ```{r}
 pp_shap_1 <- predict_parts(explainer, new_observation = diabetes_test_skip[samp[2], -6], type = "shap", B = 5)
 plot(pp_shap_1)
 ```
-
+```{r}
+p<-plot(pp_shap_1)
+png("images/2-4-shap_190.png")
+grid.arrange(p)
+dev.off()
+```
 ```{r}
 pp_bd_1 <- predict_parts(explainer, new_observation = diabetes_test_skip[samp[3], -6], type = "break_down")
 plot(pp_bd_1)
@@ -476,11 +512,23 @@ plot(pp_shap_1)
 pp_bd_1 <- predict_parts(explainer, new_observation = diabetes_test_skip[samp[4], -6], type = "break_down")
 plot(pp_bd_1)
 ```
-
+```{r}
+p<-plot(pp_bd_1)
+png("images/2-4-bd_214.png")
+grid.arrange(p)
+dev.off()
+```
 ```{r}
 pp_shap_1 <- predict_parts(explainer, new_observation = diabetes_test_skip[samp[4], -6], type = "shap", B = 5)
 plot(pp_shap_1)
 ```
+```{r}
+p<-plot(pp_shap_1)
+png("images/2-4-shap_214.png")
+grid.arrange(p)
+dev.off()
+```
+
 ```{r}
 pp_bd_1 <- predict_parts(explainer, new_observation = diabetes_test_skip[samp[5], -6], type = "break_down")
 plot(pp_bd_1)
@@ -519,20 +567,20 @@ pdp_2 <- model_profile(explainer_ada)
 plot(pdp_1, pdp_2)
 ```
 ```{r}
-pdp<-plot(pdp_1, pdp_2)
-png("images/2-4-pdp.png")
-grid.arrange(pdp)
-dev.off()
+#pdp<-plot(pdp_1, pdp_2)
+#png("images/2-4-pdp.png")
+#grid.arrange(pdp)
+#dev.off()
 
 ```
 
 ```{r, fig.height=6, fig.width=9}
-pdp_3 <- model_profile(explainer,k=2)
-pdp_4 <- model_profile(explainer_ada,k=2)
-plot(pdp_3, geom = "profiles")
+#pdp_3 <- model_profile(explainer,k=2)
+#pdp_4 <- model_profile(explainer_ada,k=2)
+#plot(pdp_3, geom = "profiles")
 ```
 ```{r, fig.height=6, fig.width=9}
-plot(pdp_4, geom = "profiles")
+#plot(pdp_4, geom = "profiles")
 ```
 
 
@@ -548,14 +596,14 @@ plot(ale_1, ale_2)
 
 
 ```{r, fig.height=6, fig.width=9}
-ale_3 <- model_profile(explainer,k=2,type="accumulated")
-ale_4 <- model_profile(explainer_ada,k=2,type="accumulated")
+#ale_3 <- model_profile(explainer,k=2,type="accumulated")
+#ale_4 <- model_profile(explainer_ada,k=2,type="accumulated")
 
-plot(ale_3, geom = "profiles")
+#plot(ale_3, geom = "profiles")
 ```
 
 ```{r, fig.height=6, fig.width=9}
-plot(ale_4,geom = "profiles")
+#plot(ale_4,geom = "profiles")
 ```
 
 
