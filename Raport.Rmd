@@ -31,29 +31,48 @@ original, naomit, mice, skip
 
 ## Measures
 
-AUC, BAlanced Accuracy and False Negative Rate
+For the assessment of the model in our experiment we will use three commonly known measures:
 
-## Models (Martyna)
+1.  **AUC - Area Under ROC Curve**     
+ 
+An ROC curve (receiver operating characteristic curve) is a graph that shows the performance of a classification model at all classification thresholds. This curve plots two parameters:
+TPR (True Positive Rate) and FPR (False Positive Rate), defined as:
+
+  $TPR=\frac{TP}{TP+FN}$
+    
+  $FPR=\frac{FP}{FP+TN}$
+ 
+2.  **BAC - BAlanced Accuracy**
+ 
+ This measure is a weighted accuracy, that is more suitable for datasets with imbalanced classes. 
+ 
+3. **FNR - False Negative Rate**
+ 
+It corresponds to the number of cases where model incorrectly fails to indicate the presence of a condition when it is present, divided by the number of all.
+
+  $FNR=\frac{FN}{TP+FN}$
+
+## Models
 
 To identify the models, that could potentially be efficient classificators on this dataset, we measured the AUC, BAlanced Accuracy and False Negative Rate measures on 6 different classification models from `mlr` package:
 
 
-### Ranger - 
+- **Ranger** - 
 Random regression forest
 
-### Adaboost 
+- **Ada** - 
 Adaptive Boosting
 
-### Binomial
+- **Binomial** - 
 Binomial Regression
 
-### GBM
+- **GBM** - 
 Gradient Boosting Machine
 
-### Naive Bayes
+- **Naive Bayes** - 
 Naive Bayes
 
-### Random Forest
+- **Random Forest** - 
 Random Forest
 
 
@@ -71,30 +90,30 @@ Local explanations allow us to better understand model's prediction from the lev
 In this explanation all observations start from the same base that is the mean prediction for all data. Next steps consist of fixing consecutive variables on values from the observation in question and measuring the change in mean prediction that is now calculated with some of the values fixed. This shift in mean prediction is interpreted as the impact of this variable's value on prediction for this observation.
 
 
-![Break Down algorythm](./img/break_down_distr.png "Break Down algorythm")
+![Break Down algorythm](./images/break_down_distr.png "Break Down algorythm")
 Figure: Panel A shows the distribution and mean prediction with values on the same level and above fixed on values from observation.
 Then change in mean is calculated and assigned to corresponding variables.
 
 A big drawback for this method is how the order of variable can influence the explanation outcome. This problem occurs most often as a result of existing interactions between variables as seen in OBRAZEK TODO
 
-![Break Down ordering impact](./img/ordering.png "Break Down ordering")
+![Break Down ordering impact](./images/ordering.png "Break Down ordering")
 Figure: Variables age and class interact with each other so the changing order results in different plots
 
 #### Shap
 
 Shap is a direct response to the biggest problem of Break Down method that is the ordering chosen for explanation could alter the results. Shap takes a number of permutation and calculates the average response of Break Down on these permutations. More permutations result in more stable explanations.
 
-![Break Down permutations](./img/shap_10_replicates.png "Break Down permutations")
+![Break Down permutations](./images/shap_10_replicates.png "Break Down permutations")
 Figure: Different results of Break Down for 10 random variable orders
 
-![Shap](./img/shap_ordering.png "Shap")
+![Shap](./images/shap_ordering.png "Shap")
 Figure: Shap output. Average impact calculated with Break Down for 10 permutations
 
 #### Lime
 
 The essence of Lime is to locally approximate the black box model with a glass box one. Then we can use it for local explanations that should yield results appropriate for the black box. Firstly, we generate data "close" to our observation (also called Point of Interest) and make predictions with black box model. Based on those predictions we try to fit the glass box model that accurately predicts those observations. In result we receive a glass box model that should behave the same as original model as long as we remain close to the Point of interest.
 
-![Lime](./img/lime_introduction.png "Lime")
+![Lime](./images/lime_introduction.png "Lime")
 Figure: Colored areas correspond to different prediction for the black box model. Black cross is our Point of Interest and circles are generated data. The line represents our simpler model that approximates original model around Point of Interest
 
 This method is often used for datasets consisting of many variables. Methods like Break down and Shap come out short in these situations.
@@ -103,10 +122,10 @@ This method is often used for datasets consisting of many variables. Methods lik
 
 Ceteris Paribus is a Latin phrase meaning "all else unchanged". This accurately describes what it does. For the certain observation we take values that are interesting to us and observe how the prediction changes as we change values in those columns one at a time. This can yield interesting conclusions about change in values and its impact on predictions. 
 
-![Ceteris Paribus](./img/titanicCeterisProfile01E-1.png "Ceteris Paribus for different models")
+![Ceteris Paribus](./images/titanicCeterisProfile01E-1.png "Ceteris Paribus for different models")
 Figure: Shape of lines resebles the nature of the model. Dot shows value and model's prediction for the observation.
 
-![Ceteris Paribus](./img/titanicCeterisProfile01D-1.png "Ceteris Paribus for different observations")
+![Ceteris Paribus](./images/titanicCeterisProfile01D-1.png "Ceteris Paribus for different observations")
 Figure: Ceteris Paribus shows different importance in variables and their changes for different observations
 
 Ceteris Paribus is very popular due to its simplicity and interpretability. The biggest drawback however is the possibility of unpredictable or misleading results. For example, with fixed variable age set to 18, predicting outcome for a significant number of pregnancies does not make sense. It is also hard to capture interactions when working with variables separately.
@@ -119,19 +138,19 @@ As the name implies in global explanations we look at variables from the perspec
 
 The main idea behind Feature Importance is measuring how important each variable is for model's predictions. To do that we measure the change in AUC after permutating values of each variable. The bigger the change, the bigger importance of variable. To stabilize the results, we can measure average change for a number of permutations.
 
-![Feature Importance](./img/TitanicRFFeatImp10-1.png "Feature Importance for 10 permutations")
+![Feature Importance](./images/TitanicRFFeatImp10-1.png "Feature Importance for 10 permutations")
 Figure: Feature Importance output for 10 permutations
 
 #### Partial Dependence
 
 To put it short, Partial Dependence is the average of Ceteris Paribus for whole data. This results in average importance and impact of variable and its values.
 
-![Partial Dependence](./img/pdpIntuition-1.png "Ceteris Paribus and Partial Dependence relation")
+![Partial Dependence](./images/pdpIntuition-1.png "Ceteris Paribus and Partial Dependence relation")
 Figure: Multiple observations with Ceteris Paribus and their average as Partial Dependence
 
 As we can see observations can return different shapes for Ceteris Paribus, hence averaging them could mean loss of information. To answer this problem Partial Dependence implements grouping and clustering that could show the difference.
 
-![Partial Dependence](./img/pdpPart5-1.png "Ceteris Paribus grouped by sex")
+![Partial Dependence](./images/pdpPart5-1.png "Ceteris Paribus grouped by sex")
 Figure: Partial Dependence grouped by sex
 
 As in Ceteris Paribus this method is very simple and understandable. However, it also carries over the same problems resulting from correlated variables.
@@ -143,28 +162,27 @@ Also referred as Accumulated-Local Dependence. It is the direct answer for corre
 
 # Results
 
-## Model comparison (Martyna)
+## Model comparison
 
 The models were checked on both `original` and `skip` dataset version, with the following results:
 
 ### Data Original
-![](./img/results_original.png)
-
-The measure values between models are very similar, however, 
+![](./images/2-4-data-original.png)
 
 ### Data Skip
-![](./img/results_skip.png)
+![](./images/2-4-data-skip.png)
 
 Based on the results, two models: Ranger and Ada where chosen for further analysis. Hyperparamether tuning using random grid search was peformed, resulting in classificators with the following values:
 
 
-Ranger
+**Ranger**
+
  - num.trees=776, 
  - mtry=1,
  - min.node.size=8
  - splitrule="extratrees"
  
-Ada
+**Ada**
  - loss='logistic'
  - type='discrete',
  - iter=81,
@@ -191,9 +209,65 @@ Ada
 
 # Discussion
 
-## Expert opions + comparison (Martyna)
+## Expert opinion
+
+There are two main types of diabetes:
+
+- **type 1 diabetes**, where the body does not make insulin. It is mostly caused by genetic and enviromental factors
+
+- **type 2 diabetes**, where the body does not make or use insulin well. It is the most common kind of diabetes. It is caused by several factors, including lifestyle factors and genes
+
+Unfortunately, we do not have any data about the type of diabetes that was found among the patients in the investigated dataset. However, since type 2 diabetes is the most common type, and some of the factors causing the different types are common, we will focus mostly on the risk factors for type 2 diabetes.
+
+### Causes of type 2 diabetes
+
+According to the National Institute of Diabetes and Digestive and Kidney Diseases (NIDDK), type 2 diabetes can be caused by several factors:
+
+- **obesity and physical inactivity**
+
+Extra weight sometimes causes insulin resistance and is common in people with type 2 diabetes. 
+
+- **insulin resistance**
+
+Type 2 diabetes usually begins with insulin resistance, a condition in which muscle, liver, and fat cells do not use insulin well. As a result, your body needs more insulin to help glucose enter cells. At first, the pancreas makes more insulin to keep up with the added demand. Over time, the pancreas can’t make enough insulin, and blood glucose levels rise.
+
+- **genes and family history**
+
+As in type 1 diabetes, certain genes may make you more likely to develop type 2 diabetes. Genes also can increase the risk of type 2 diabetes by increasing a person’s tendency to become overweight or obese.
+
+- **ethnicity**
+
+Diabetes occurs more often in these racial/ethnic groups:
+  - African Americans
+  - Alaska Natives
+  - American Indians
+  - Asian Americans
+  - Hispanics/Latinos
+  - Native Hawaiians
+  - Pacific Islanders
+  
+- **age**
+Type 2 diabetes occurs most often in middle-aged and older adults, but it can also affect children.
+
+- **gestational diabetes**
+Gestational diabetes is the type of diabets thatdevelops during pregnancy and is caused by the hormonal changes of pregnancy along with genetic and lifestyle factors. Women with a history of gestational diabetes  have a greater chance of developing type 2 diabetes later in life.
+
+### Comparison
+
+The causes of diabetes according to experts directly correspond with the columns is the explained dataset:
+
+- `plas` - plasma glucose concentration, can indicate whether tha patient suffers from a **insulin resistance**
+- `mass` - Body Mass Index (BMI) can be one of the indicators whether patients **weight** puts him at risk for type 2 diabetes
+- `age`- *older* people are generally more likely to develop diabetes
+- `pedi` - predigree function is meant to be an indicator of patients risk for diabetes based on his **genes and family history**
+- `preg` - women that have been pregnant multiple times are more likely to develop **gestational diabetes**, and therefor, type 2 diabetes later in life.
+
+Since all the women in the dataset have the same **ethnicity**, it is not a factor that can be considered valuable in this experiment.
 
 # Conclusion
 
 # References
 
+- https://www.niddk.nih.gov/health-information/diabetes/overview/symptoms-causes#causes
+
+- https://www.nia.nih.gov/health/diabetes-older-people

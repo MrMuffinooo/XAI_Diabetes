@@ -71,19 +71,23 @@ measureBAC(as.factor(pred_ranger$truth),
 cm_ranger<-caret::confusionMatrix(as.factor(pred_ranger$truth),
                        pred_ranger$response, positive="1")
 
-
-samp <- sample(1:231, 5)
+set.seed(13)
+samp <- c(140,190,202,214,74)
 pp_shap_1<-predict_parts(explainer, new_observation = diabetes_test_skip[samp[2], -6], type = "shap", B = 5)
 plot(pp_shap_1)
 
+roc <- roc(response=as.factor(as.numeric(pred_ranger$truth)), as.numeric(pred_ranger$response))
+roc$auc
+plot(roc)
 
 ## ADA
 classif_task_ada <- makeClassifTask(id = "ada_tune_random", data = diabetes_train_skip, target = "class")
 classif_lrn_ada <- makeLearner("classif.ada", predict.type = "prob", par.vals = list(loss='logistic', type='discrete', iter=81, max.iter=3, minsplit=45, minbucket=4, maxdepth=1))
 model_skip_ada<- mlr::train(classif_lrn_ada, classif_task_ada)
 pred_ada <- predict(model_skip_ada, newdata = diabetes_test_skip)$data
-# explainer_ada <- explain(id='Ada', model = model_random_skip_ada,
-#                          data = diabetes_test_skip[,-6],
+explainer_ada <- explain(id='Ada', model = model_random_skip_ada,
+                          data = diabetes_test_skip[,-6],
+                         y = as.numeric(as.character(diabetes_test_skip$class)))
 
 measureAUC(probabilities = pred_ada$prob.1,
            truth = pred_ada$truth,
@@ -106,10 +110,15 @@ caret::confusionMatrix(as.factor(pred_ada$truth),
                          )
 
 
+roc <- roc(response=as.factor(as.numeric(pred_ada$truth)), as.numeric(pred_ada$response))
+roc$auc
+plot(roc)
+
 library(ggplot2) 
 diabetes_skip<-rbind(diabetes_train_skip, diabetes_test_skip)
 ggplot(diabetes_skip, aes(x=mass)) + 
   geom_boxplot(fill="#99d8c9", width=3)+
   ylim(-5,5)+
   theme_minimal()
+
 

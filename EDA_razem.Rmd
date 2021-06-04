@@ -24,6 +24,8 @@ library(mice)
 library(ggplot2)
 library(gridExtra)
 library(ranger)
+library(kableExtra)
+library(ghostscript)
 
 set.seed(13)
 
@@ -217,17 +219,17 @@ for(i in 1:4){
                        newdata = test_datasets[[i]])$data
   
   # auc
-  auc[i] <- measureAUC(probabilities = prediction$prob.1,
+  auc[i] <- round(measureAUC(probabilities = prediction$prob.1,
                        truth = prediction$truth,
                        negative="0",
-                       positive = "1")
+                       positive = "1"),4)
   
-  FNR[i] <- measureFNR(prediction$truth, 
+  FNR[i] <- round(measureFPR(prediction$truth, 
                        prediction$response,
                        negative="0",
-                       positive = "1")
-  BAC[i]<-measureBAC(prediction$truth, 
-                       prediction$response)
+                       positive = "1"),4)
+  BAC[i]<-round(measureBAC(prediction$truth, 
+                       prediction$response),4)
   
 }
 
@@ -236,12 +238,14 @@ for(i in 1:4){
 ## Ranger Results
 
 ```{r results}
-results<-data.frame(AUC=auc, FalseNegativeRate=FNR, BalancedAccuracy=BAC)
+results<-data.frame(AUC=auc, BAC=BAC, FNR=FNR)
 row.names(results)<-c("naomit", "mice", "skip", "original")
-results
+results %>%
+  kbl() %>%
+  kable_styling()
 ```
 
-The results are very similar and seem random (depend on seed).
+
 
 ## Data Skip
 
@@ -259,27 +263,31 @@ for (i in 1:length(classifiers)){
     classif_lrn <- makeLearner(classifiers[i], predict.type = "prob")
     model <- mlr::train(classif_lrn, classif_task)
     pred_test <- predict(model, newdata = diabetes_test_skip)$data
-    AUC[i] <- measureAUC(probabilities = pred_test$prob.1,
+    AUC[i] <- round(measureAUC(probabilities = pred_test$prob.1,
                        truth = pred_test$truth,
                        negative="0",
-                       positive = "1")
+                       positive = "1"),4)
 
-    FNR[i] <- measureFPR(pred_test$truth,
+    FNR[i] <- round(measureFPR(pred_test$truth,
                        pred_test$response,
                        negative="0",
-                       positive = "1")
-    BAC[i] <- measureBAC(pred_test$truth,
-                       pred_test$response)
+                       positive = "1"),4)
+    BAC[i] <- round(measureBAC(pred_test$truth,
+                       pred_test$response),4)
     
 }  
 
 res<-data.frame(AUC=AUC, BalancedAccuracy=BAC, FalseNegativeRate=FNR)
 row.names(res)<-c("Ranger", "Ada", "Binomial", "GBM","Naive Bayes","Random forest")
 res
-#png("img\results_skip.png")
-#p<-tableGrob(res)
-#grid.arrange(p)
-#dev.off()
+```
+
+
+```{r}
+res %>%
+  kbl() %>%
+  kable_styling()
+
 ```
 
 ## Data Original
@@ -298,17 +306,17 @@ for (i in 1:length(classifiers)){
     classif_lrn <- makeLearner(classifiers[i], predict.type = "prob")
     model <- mlr::train(classif_lrn, classif_task)
     pred_test <- predict(model, newdata = diabetes_test_original)$data
-    AUC[i] <- measureAUC(probabilities = pred_test$prob.1,
+    AUC[i] <- round(measureAUC(probabilities = pred_test$prob.1,
                        truth = pred_test$truth,
                        negative="0",
-                       positive = "1")
+                       positive = "1"),4)
 
-    FNR[i] <- measureFPR(pred_test$truth,
+    FNR[i] <- round(measureFPR(pred_test$truth,
                        pred_test$response,
                        negative="0",
-                       positive = "1")
-    BAC[i] <- measureBAC(pred_test$truth,
-                       pred_test$response)
+                       positive = "1"),4)
+    BAC[i] <- round(measureBAC(pred_test$truth,
+                       pred_test$response),4)
     
 }  
 
@@ -321,7 +329,12 @@ res
 #dev.off()
 
 ```
+```{r}
+res %>%
+  kbl() %>%
+  kable_styling()
 
+```
 
 ## Explanations
 
