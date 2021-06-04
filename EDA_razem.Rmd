@@ -25,7 +25,6 @@ library(ggplot2)
 library(gridExtra)
 library(ranger)
 library(kableExtra)
-library(ghostscript)
 
 set.seed(13)
 
