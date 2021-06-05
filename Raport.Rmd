@@ -15,7 +15,7 @@ Machine Learning is nowadays widely used in many more or less scientific fields.
 
 ## Keywords
 
-# Introduction (Jung)
+# Introduction
 
 With the rise in popularity of Machine Learning algorithms people started questioning the solutions obtained by computers' calculations. As an answer a whole new branch of AI has been formed - Explainable Artificial Intelligence (XAI). With its methods we analyzed the model made for the specific problem.
 
@@ -23,7 +23,7 @@ Our task was to find correlation between different biomarkers and positive diagn
 
 # Methods
 
-## Dataset (Jung)
+## Dataset
 
 Our dataset consists of 768 observations of 8 features being different biomarkers and 1 target variable (`class`) saying if that woman was diagnosed with diabetes. 
 
@@ -41,7 +41,7 @@ Our dataset consists of 768 observations of 8 features being different biomarker
 
 The dataset didn't have any missing data, however after analysing the features and their meaning we found many 0 values that made no sense and weren't physically possible (for example 0 value of `mass` which is BMI index - mass (in kilograms) divided by squared height (in meters)). We then went through the article for which this data was collected and found that it was possible that some tests had never been carried for some observations. This meant that the 0 values in our dataset (for features other than `preg` and `class` for which they absolutely make sense) were actually missing values.
 
-## Dataset versions (Jung)
+## Dataset versions
 
 During preprocessing and based on the observations of our fist models we created 4 different versions of dataset which we later used to train our models. Those versions were:
 
@@ -101,7 +101,7 @@ Random Forest
 
 
 
-## Explanations (Karol)
+## Explanations
 
 In this section we will take time to investigate some model explanations that we will be using later. Feel free to use this chapter as reference for quick overview. For more in-depth knowledge please refer to paper [_Explanatory Model Analysis_](https://ema.drwhy.ai/InstanceLevelExploration.html) [1] by professor Biecek. //bookdown?? TODO
 All images in this section are also taken from this article.
@@ -218,7 +218,7 @@ Based on the results, two models: Ranger and Ada were chosen for further analysi
 
 #### Variable Importance
 
-Figure TODO shows Feature Importance for booth Ada and Ranger models. As we can see, booth agree with each other as to what variables are most important to them. Their predictions are mostly based on the values of *plas* variable and then *mass* and *age* come second.
+Figure TODO shows Feature Importance for both Ada and Ranger models. As we can see, both agree with each other as to what variables are most important to them. Their predictions are mostly based on the values of *plas* variable and then *mass* and *age* come second.
 
 ![Figure: Variable importance for Ada and Ranger based on AUC loss after permutations.](./images/2-4-variable-importance.png){width=50%}
 
@@ -244,23 +244,27 @@ Accumulated Dependence gave us similar results to Partial Dependence, thus we ca
 
 ### Local
 
-Local explainations for Ada and ranger models were very simmilar so we focused on one with a bit better metrics that is Ranger. 
+Local explainations for Ada and ranger models were very similar so we focused on the one with a bit better metrics, that is Ranger. 
 
-Ceteris Paribus shows us results adequate to Pratial Dependence Profile (See Figures TODO and TODO). Predictions are very consistent in variable _plas_. However in _age_ and _pedi_ cases we can spot different trends in prediction behaviour. This could hint thorvards potential interactions between variables. As for _mass_ and _preg_ they differ mostly in initial prediction value. Overall tendency is rising.
+Ceteris Paribus shows us results adequate to Pratial Dependence Profile (See Figures TODO and TODO). Predictions are very consistent in variable _plas_. However in _age_ and _pedi_ cases we can spot different trends in prediction behaviour. This could hint towards potential interactions between variables. As for _mass_ and _preg_ they differ mostly in initial prediction value. Overall tendency is rising.
 
 ![Figure: Ceteris Paribus predictions for five selected observations](./images/2-4-ceteris-paribus.png){width=50%}
 
-Let us analyze observation 190 in more detail. Lime explanation (Figure TODO) tells us three biggest factors approximated by glass box model. Having _plas_ in our case has significant negative impact on observation for having diabetes. On the other hand, having high _mass_ index and being 30 or so yers old adds to our propability.
+Let us analyze observation 190 in more detail. Lime explanation (Figure TODO) tells us three biggest factors approximated by glass box model. Having _plas_ lower than 100 in our case has significant negative impact on positive diagnosis of diabetes. On the other hand, having high _mass_ index and being in 30's adds to our probability of having diabetes.
 
 ![Figure: Lime output for observation 190](./images/2-4-lime_190.png){width=50%}
 
-Breakdown and Shap (Figures TODO and TODO) as opposed to Lime give us prediction change for exact values, not intervals. Because of that the results may be different. So is the case with the _age_ variable which behaves differently for Lime and others. According to Breakdown and Shap being 29 years of age slightly decreases prediction but Lime says otherwise. Not only it increases but also by a significant amount. Other variables seem to mach their impact if just scaled down a bit for BD and Shap.
+Breakdown and Shap (Figures TODO and TODO) as opposed to Lime give us prediction change for exact values, not intervals. Because of that the results may be different. So is the case with the _age_ variable which behaves differently for Lime. According to Breakdown and Shap being 29 years of age slightly decreases prediction but Lime says otherwise. Not only it increases but also by a significant amount. Other variables seem to match their impact if just scaled down a bit for BD and Shap.
 
 ![Figure: Breakdown output for observation 190](./images/2-4-bd_190.png){width=50%}
 
 ![Figure: Shap output for observation 190](./images/2-4-shap_190.png){width=50%}
 
+The next observation we analyze is observation 214 for which the model has a prediction of about 44% for positive diagnosis of diabetes. Lime explanation (Figure TODO) tells us that three biggest factors for this prediction are _pedi_, _plas_ and _mass_. This time the first one is _pedi_ with high value of over 0.5. Despite high values of _plas_ (over 115) and _mass_ (over 33), the prediction is higher than average for this dataset, but still lower than 50%.
+
 ![Figure: Lime output for observation 214](./images/2-4-lime_214.png){width=50%}
+
+Breakdown and Shap (Figures TODO and TODO) show similar results, just toned down. The biggest difference is the impact of _pedi_ which in Lime was nearly twice as big as the impact of _plas_ and _mass_. The only value making it less probable that the observation would have diabetes is _age_ equal to 28.
 
 ![Figure: Breakdown output for observation 214](./images/2-4-bd_214.png){width=50%}
 
