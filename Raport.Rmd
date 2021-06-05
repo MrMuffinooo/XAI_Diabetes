@@ -244,19 +244,27 @@ Accumulated Dependence gave us similar results to Partial Dependence, thus we ca
 
 ### Local
 
-![](./images/2-4-ceteris-paribus.png){width=50%}
+Local explainations for Ada and ranger models were very simmilar so we focused on one with a bit better metrics that is Ranger. 
 
-![](./images/2-4-lime_190.png){width=50%}
+Ceteris Paribus shows us results adequate to Pratial Dependence Profile (See Figures TODO and TODO). Predictions are very consistent in variable _plas_. However in _age_ and _pedi_ cases we can spot different trends in prediction behaviour. This could hint thorvards potential interactions between variables. As for _mass_ and _preg_ they differ mostly in initial prediction value. Overall tendency is rising.
 
-![](./images/2-4-bd_190.png){width=50%}
+![Figure: Ceteris Paribus predictions for five selected observations](./images/2-4-ceteris-paribus.png){width=50%}
 
-![](./images/2-4-shap_190.png){width=50%}
+Let us analyze observation 190 in more detail. Lime explanation (Figure TODO) tells us three biggest factors approximated by glass box model. Having _plas_ in our case has significant negative impact on observation for having diabetes. On the other hand, having high _mass_ index and being 30 or so yers old adds to our propability.
 
-![](./images/2-4-lime_214.png){width=50%}
+![Figure: Lime output for observation 190](./images/2-4-lime_190.png){width=50%}
 
-![](./images/2-4-bd_214.png){width=50%}
+Breakdown and Shap (Figures TODO and TODO) as opposed to Lime give us prediction change for exact values, not intervals. Because of that the results may be different. So is the case with the _age_ variable which behaves differently for Lime and others. According to Breakdown and Shap being 29 years of age slightly decreases prediction but Lime says otherwise. Not only it increases but also by a significant amount. Other variables seem to mach their impact if just scaled down a bit for BD and Shap.
 
-![](./images/2-4-shap_214.png){width=50%}
+![Figure: Breakdown output for observation 190](./images/2-4-bd_190.png){width=50%}
+
+![Figure: Shap output for observation 190](./images/2-4-shap_190.png){width=50%}
+
+![Figure: Lime output for observation 214](./images/2-4-lime_214.png){width=50%}
+
+![Figure: Breakdown output for observation 214](./images/2-4-bd_214.png){width=50%}
+
+![Figure: Shap output for observation 214](./images/2-4-shap_214.png){width=50%}
 
 # Discussion
 
