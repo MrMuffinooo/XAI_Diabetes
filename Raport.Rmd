@@ -33,7 +33,7 @@ Our dataset consists of 768 observations of 8 features being different biomarker
 - `age` : age (years)
 - `class` (target): 1 if tested positive for diabetes, 0 otherwise
 
-![Figure: Distributions of features.](./images/2-4-distributions.png){width=50%}
+<!-- ![Figure: Distributions of features.](./images/2-4-distributions.png){width=50%} -->
 
 The dataset didn't have any missing data, however after analysing the features and their meaning we found many 0 values that made no sense and weren't physically possible (for example 0 value of `mass` which is BMI index - mass (in kilograms) divided by squared height (in meters)). We then went through the article for which this data was collected and found that it was possible that some tests had never been carried for some observations. This meant that the 0 values in our dataset (for features other than `preg` and `class` for which they absolutely make sense) were actually missing values.
 
@@ -74,7 +74,7 @@ It corresponds to the number of cases where model incorrectly fails to indicate 
 
 ## Models
 
-To identify the models, that could potentially be efficient classificators on this dataset, we measured the AUC, BAlanced Accuracy and False Negative Rate measures on 6 different classification models from `mlr` package:
+To identify the models, that could potentially be efficient classificators on this dataset, we measured the AUC, Balanced Accuracy and False Negative Rate measures on 6 different classification models from `mlr` package:
 
 
 - **Ranger** - 
@@ -104,7 +104,7 @@ All images in this section are also taken from this article.
 
 ### Local
 
-Local explanations allow us to better understand model's prediction from the level of single observations. This can be useful when we want to evaluate predictions for particular instances. For example, which values have the most importance for the particular observations, or how the change in variables would impact the result. Local explanations combined with professional expertise could sometimes hint towards potential problems with the model in case they contradict each other. 
+Local explanations allow us to better understand model's prediction from the level of single observations. This can be useful when we want to evaluate predictions for certain instances. For example, which values have the most importance for the particular observations, or how the change in variables would impact the result. Local explanations combined with professional expertise could sometimes hint towards potential problems with the model in case they contradict each other. 
 
 #### Break Down
 
@@ -134,9 +134,9 @@ This method is often used for datasets consisting of many variables. Methods lik
 
 #### Ceteris Paribus
 
-Ceteris Paribus is a Latin phrase meaning "all else unchanged". This accurately describes what it does. For the certain observation we take values that are interesting to us and observe how the prediction changes as we change values in those columns one at a time. This can yield interesting conclusions about change in values and its impact on predictions. Figures TODO and TODO show prediction change as responce for variable change.
+Ceteris Paribus is a Latin phrase meaning "all else unchanged". This accurately describes what it does. For the certain observation we take values that are interesting to us and observe how the prediction changes as we change values in those columns one at a time. This can yield interesting conclusions about change in values and its impact on predictions. Figures TODO and TODO show prediction change as response for variable change.
 
-![Figure: Shape of lines resebles the nature of the model. Dot shows value and model's prediction for the observation.](./images/2-4-titanicCeterisProfile01E-1.png){width=50%}
+![Figure: Shape of lines resembles the nature of the model. Dot shows value and model's prediction for the observation.](./images/2-4-titanicCeterisProfile01E-1.png){width=50%}
 
 
 
@@ -188,7 +188,7 @@ The measure values between models are very similar, however,
 ### Data Skip
 ![](./images/2-4-data-skip.png){width=50%}
 
-Based on the results, two models: Ranger and Ada where chosen for further analysis. Hyperparamether tuning using random grid search was peformed, resulting in classificators with the following values:
+Based on the results, two models: Ranger and Ada were chosen for further analysis. Hyperparameter tuning using random grid search was performed, resulting in classificators with the following values:
 
 
 **Ranger**
@@ -214,14 +214,14 @@ Based on the results, two models: Ranger and Ada where chosen for further analys
 
 #### Variable Importance
 
-Figure TODO shows Feature Importance for booth Ada and Ranger models. As we can see, booth aggree with eachother as to what variables are most important to them. Their predictions are mostly based on the values of *plas* variable and then *mass* and *age* come second.
+Figure TODO shows Feature Importance for booth Ada and Ranger models. As we can see, booth agree with each other as to what variables are most important to them. Their predictions are mostly based on the values of *plas* variable and then *mass* and *age* come second.
 
 ![Figure: Variable importance for Ada and Ranger based on AUC loss after permutations.](./images/2-4-variable-importance.png){width=50%}
 
 #### Partial Dependence Profile
 
-Partial Dependence profile seen in figure TODO give us perhaps the most interesting results. Firstly, they are adequate to Feature importance in Figure TODO. The more important variables return wider range of average prediction and less important give less varied predictions respectively. Secondly, we can observe the difference in model's inner characteristics based on the shape of their's PDP functions. Ada is more edgy and straight while ranger more smooth. 
-Based on results yielded by PDP and acording to these two models we can conclude that, generally speaking the bigger the values the higher the chance of positive Diabetes test result.
+Partial Dependence profile seen in figure TODO give us perhaps the most interesting results. Firstly, they are adequate to Feature importance in Figure TODO. The more important variables return wider range of average prediction and less important give less varied predictions respectively. Secondly, we can observe the difference in model's inner characteristics based on the shape of theirs PDP functions. Ada is more edgy and straight while ranger more smooth. 
+Based on results yielded by PDP and according to these two models we can conclude that, generally speaking the bigger the values the higher the chance of positive Diabetes test result.
 
 Some other key observations include: 
 
@@ -232,7 +232,11 @@ Some other key observations include:
 
 ![Figure: Average predictions with PDP for ada and ranger.](./images/2-4-pdp.png){width=50%}
 
-![Figure: Partial dependence and acumulated dependence on ranger's mass variable.](./images/2-4-pdp-ale-mass.png){width=50%}
+#### Accumulated Dependence Profile
+
+Accumulated Dependence gave us similar results to Partial Dependence, thus we can conclude that our dataset does not contain any problematic correlations. Comparison between PD and AD is plotted on the Figure TODO for _mass_ variable.
+
+![Figure: Partial dependence and accumulated dependence on ranger's mass variable.](./images/2-4-pdp-ale-mass.png){width=50%}
 
 ### Local
 
@@ -256,7 +260,7 @@ Some other key observations include:
 
 There are two main types of diabetes:
 
-- **type 1 diabetes**, where the body does not make insulin. It is mostly caused by genetic and enviromental factors
+- **type 1 diabetes**, where the body does not make insulin. It is mostly caused by genetic and environmental factors
 
 - **type 2 diabetes**, where the body does not make or use insulin well. It is the most common kind of diabetes. It is caused by several factors, including lifestyle factors and genes
 
@@ -272,7 +276,7 @@ Extra weight sometimes causes insulin resistance and is common in people with ty
 
 - **insulin resistance**
 
-Type 2 diabetes usually begins with insulin resistance, a condition in which muscle, liver, and fat cells do not use insulin well. As a result, your body needs more insulin to help glucose enter cells. At first, the pancreas makes more insulin to keep up with the added demand. Over time, the pancreas can’t make enough insulin, and blood glucose levels rise.
+Type 2 diabetes usually begins with insulin resistance, a condition in which muscle, liver, and fat cells do not use insulin well. As a result, your body needs more insulin to help glucose enter cells. At first, the pancreas makes more insulin to keep up with the added demand. Over time, the pancreas cannot make enough insulin, and blood glucose levels rise.
 
 - **genes and family history**
 
@@ -293,17 +297,17 @@ Diabetes occurs more often in these racial/ethnic groups:
 Type 2 diabetes occurs most often in middle-aged and older adults, but it can also affect children.
 
 - **gestational diabetes**
-Gestational diabetes is the type of diabets thatdevelops during pregnancy and is caused by the hormonal changes of pregnancy along with genetic and lifestyle factors. Women with a history of gestational diabetes  have a greater chance of developing type 2 diabetes later in life.
+Gestational diabetes is the type of diabets that develops during pregnancy and is caused by the hormonal changes of pregnancy along with genetic and lifestyle factors. Women with a history of gestational diabetes  have a greater chance of developing type 2 diabetes later in life.
 
 ### Comparison
 
 The causes of diabetes according to experts directly correspond with the columns is the explained dataset:
 
-- `plas` - plasma glucose concentration, can indicate whether tha patient suffers from a **insulin resistance**
+- `plas` - plasma glucose concentration, can indicate whether the patient suffers from a **insulin resistance**
 - `mass` - Body Mass Index (BMI) can be one of the indicators whether patients **weight** puts him at risk for type 2 diabetes
 - `age`- *older* people are generally more likely to develop diabetes
-- `pedi` - predigree function is meant to be an indicator of patients risk for diabetes based on his **genes and family history**
-- `preg` - women that have been pregnant multiple times are more likely to develop **gestational diabetes**, and therefor, type 2 diabetes later in life.
+- `pedi` - predigree function is meant to be an indicator of patients' risk for diabetes based on his **genes and family history**
+- `preg` - women that have been pregnant multiple times are more likely to develop **gestational diabetes**, and therefore, type 2 diabetes later in life.
 
 Since all the women in the dataset have the same **ethnicity**, it is not a factor that can be considered valuable in this experiment.
 
