@@ -11,6 +11,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Abstract
 
+Mashine learning is nowdays widely used in many more or less scientific fields. Some interesting ones include economy, social networking and medicine. Sometimes however we not only need a well performing model but also an understable one. The Explainable Mashine Learning (XAI) is still pretty new concept and has a lot of potential for its use. In this paper we harness XAI methods for a real world medicine problem. We take a look at the diabetic data, build a decent model based on it and try to understand what conclusions the model has reached. As a result for our experiment we will understand what factors contribute to higher chanse of diabetes occurence.
+
 ## Keywords
 
 # Introduction (Jung)
