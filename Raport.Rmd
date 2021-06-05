@@ -15,7 +15,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Introduction (Jung)
 
-Our task was to find correlation between different biomarkers and positive diagnosis of diabetes based on the data of over 700 women of indian ancestry (Pima tribe).
+With the rise in popularity of Machine Learning algorithms people started questioning the solutions obtained by computers' calculations. A whole new branch of AI has been formed - Explainable Artificial Intelligence (XAI).
+
+Our task was to find correlation between different biomarkers and positive diagnosis of diabetes based on the data of over 700 women of indian ancestry (Pima tribe). In order to do that, we used XAI tools on our black box models to present the decision making process of algorithms in understandable for humans way from which we could later draw conclusions.
 
 # Methods
 
