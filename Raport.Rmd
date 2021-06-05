@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Abstract
 
-Mashine learning is nowdays widely used in many more or less scientific fields. Some interesting ones include economy, social networking and medicine. Sometimes however we not only need a well performing model but also an understable one. The Explainable Mashine Learning (XAI) is still pretty new concept and has a lot of potential for its use. In this paper we harness XAI methods for a real world medicine problem. We take a look at the diabetic data, build a decent model based on it and try to understand what conclusions the model has reached. As a result for our experiment we will understand what factors contribute to higher chanse of diabetes occurence.
+Machine Learning is nowadays widely used in many more or less scientific fields. Some interesting ones include economy, social networking and medicine. Sometimes however we not only need a well performing model but also an understable one. The Explainable Atrificial Intelligence (XAI) is still pretty new concept and has a lot of potential for its use. In this paper we harness XAI methods for a real world medicine problem. We take a look at the diabetic data, build a decent model based on it and try to understand what conclusions the model has reached. As a result of our experiment we will try to understand what factors contribute to higher chance of diabetes occurence.
 
 ## Keywords
 
@@ -37,7 +37,7 @@ Our dataset consists of 768 observations of 8 features being different biomarker
 - `age` : age (years)
 - `class` (target): 1 if tested positive for diabetes, 0 otherwise
 
-<!-- ![Figure: Distributions of features.](./images/2-4-distributions.png){width=50%} -->
+![Figure: Distributions of features.](./images/2-4-distributions.png){width=50%}
 
 The dataset didn't have any missing data, however after analysing the features and their meaning we found many 0 values that made no sense and weren't physically possible (for example 0 value of `mass` which is BMI index - mass (in kilograms) divided by squared height (in meters)). We then went through the article for which this data was collected and found that it was possible that some tests had never been carried for some observations. This meant that the 0 values in our dataset (for features other than `preg` and `class` for which they absolutely make sense) were actually missing values.
 
