@@ -15,6 +15,8 @@ Machine Learning is nowadays widely used in many more or less scientific fields.
 
 ## Keywords
 
+Machine Learning, Explainable Artificial Intelligence, XAI, Classification, Diabetes
+
 # Introduction
 
 With the rise in popularity of Machine Learning algorithms people started questioning the solutions obtained by computers' calculations. As an answer a whole new branch of AI has been formed - Explainable Artificial Intelligence (XAI). With its methods we analyzed the model made for the specific problem.
@@ -37,21 +39,28 @@ Our dataset consists of 768 observations of 8 features being different biomarker
 - `age` : age (years)
 - `class` (target): 1 if tested positive for diabetes, 0 otherwise
 
-![Figure: Distributions of features.](./images/2-4-distributions.png){width=50%}
+![Figure: Distributions of features.](./images/2-4-distributions.png){width=70%}
 
 The dataset didn't have any missing data, however after analysing the features and their meaning we found many 0 values that made no sense and weren't physically possible (for example 0 value of `mass` which is BMI index - mass (in kilograms) divided by squared height (in meters)). We then went through the article for which this data was collected and found that it was possible that some tests had never been carried for some observations. This meant that the 0 values in our dataset (for features other than `preg` and `class` for which they absolutely make sense) were actually missing values.
 
 ## Dataset versions
 
-During preprocessing and based on the observations of our fist models we created 4 different versions of dataset which we later used to train our models. Those versions were:
+During preprocessing and based on the observations of our fist models we created 4 different versions of dataset which we later used to train our models. First, the dataset was randomly divided into a training dataset (70% of data) and testing dataset(30% of data). Then the datasets were individually modificated in the following way:
 
 - `original` - base dataset with no modifications
  
 - `naomit` - base dataset excluding observations with any missing values
+
+- `mice` - base dataset with all missing values imputed with mice package using PMM method. Mice is suitable for this dataset, since the values are missing at random. 
  
-- `skip` - base dataset excluding features `skin`, `insu` and `pres`
+- `skip` - base dataset excluding features `skin`, `insu` and `pres` with missing values in `mass` and `plas` imputed with mice package
  
-- `mice` - `skip` version with missing values imputed with mice
+|Dataset |Rows Train| Rows Test | Columns|
+--- | --- | --- | --- |
+|original|537|231|9|
+|naomit|372|160|9|
+|mice|537|231|9|
+|skip|537|231|6|
 
 ## Measures
 
@@ -76,28 +85,31 @@ It corresponds to the number of cases where model incorrectly fails to indicate 
 
   $FNR=\frac{FN}{TP+FN}$
 
+ It is particularly important for medical data models, because it indicates how many sick patients are going to be categorised as healthy, and therefor not get any treatment.
+
 ## Models
 
 To identify the models, that could potentially be efficient classificators on this dataset, we measured the AUC, Balanced Accuracy and False Negative Rate measures on 6 different classification models from `mlr` package:
 
+Tree-based models:
 
-- **Ranger** - 
-Random regression forest
+- **Random Forest** - Random Forest
 
-- **Ada** - 
-Adaptive Boosting
+- **Ranger** - Random regression forest
 
-- **Binomial** - 
-Binomial Regression
+Boosting models:
 
-- **GBM** - 
-Gradient Boosting Machine
+- **Ada** - Adaptive Boosting
 
-- **Naive Bayes** - 
-Naive Bayes
+- **GBM** - Gradient Boosting Machine
 
-- **Random Forest** - 
-Random Forest
+Other:
+
+- **Binomial** - Binomial Regression
+
+- **Naive Bayes** - Naive Bayes
+
+
 
 
 
@@ -179,6 +191,14 @@ Also referred as Accumulated-Local Dependence. It is the direct answer for corre
 
 # Results
 
+## Dataset versions comparison
+
+We compared the performance of the `ranger` model with default values on the testing datasets, using AUC, Balanced Accuracy and False Negative Rate measures.
+
+![](./images/2-4-dataset-versions.png){width=50%}
+
+The `naomit` dataset has the best scores, however, using this dataset version may cause the loss of valuable information. Because of that, we are going to use `original` and `skip` versions for further analysis.
+
 ## Model comparison
 
 The models were checked on both `original` and `skip` dataset version, with the following results:
@@ -187,12 +207,15 @@ The models were checked on both `original` and `skip` dataset version, with the 
 
 ![](./images/2-4-data-original.png){width=50%}
 
-The measure values between models are very similar, however, 
+The measure values between models are quite similar, however Ada has the best Balanced Accuracy and Binomial has the lowest False Negative Rate.
 
 ### Data Skip
 ![](./images/2-4-data-skip.png){width=50%}
 
-Based on the results, two models: Ranger and Ada were chosen for further analysis. Hyperparameter tuning using random grid search was performed, resulting in classificators with the following values:
+On this dataset version Binomial still has the lowest `FNR`, but no model has a sighnificantly better results than the `ranger` model.
+
+Better results can be achieved with the use of parameter tuning.
+Based on the results, two models: Ranger and Ada were chosen for further experimenting. Hyperparameter tuning using random grid search was performed, resulting in classificators with the following values:
 
 
 **Ranger**
@@ -328,6 +351,8 @@ The causes of diabetes according to experts directly correspond with the columns
 Since all the women in the dataset have the same **ethnicity**, it is not a factor that can be considered valuable in this experiment.
 
 # Conclusion
+
+In this scenario the causes of diabetes indicated by the XAI methods match the causes presented by the medical professionals. The Explainable Artificial Intelligence is an extremely helpful tool. It can be used to gain better understanding of the classification models, especially the ones used for making medical diagnosis, where this understanding is crucial to patients health and safety. 
 
 # References
 
