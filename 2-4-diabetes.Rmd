@@ -36,7 +36,7 @@ The dataset consists of 768 observations of 8 features being different biomarker
 - `class` (target): 1 if tested positive for diabetes, 0 otherwise
 
 ```{r 2-4-distributions, fig.align='center',fig.cap='Distributions of features and target in the original dataset',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
-knitr::include_graphics('images/2-4-distributions-2.png')
+knitr::include_graphics('images/2-4-distributions.png')
 ```
 
 
