@@ -1,6 +1,6 @@
 ## Explaining diabetes indicators
 
-*Authors: Martyna Majchrzak, Jakub Jung, Karol Niewiadowski (Warsaw University of Techcnology)*
+*Authors: Martyna Majchrzak, Jakub Jung, Paweł Niewiadowski (Warsaw University of Technology)*
 
 ### Abstract
 
@@ -40,7 +40,7 @@ knitr::include_graphics('images/2-4-distributions-2.png')
 ```
 
 
-The dataset did not have any missing data, however after analysing the feature distributions (\@ref(fig:2-4-distributions)) and their meaning we found many 0 values that made no sense and were not physically possible (for example 0 value of `mass` which is BMI index - mass (in kilograms) divided by squared height (in meters)). According to an article about cost-sensitive classification [@2-4-cost], which addressed this dataset it is possible that some tests had never been carried out for some patients. This meant that the 0 values in our dataset (for features other than `preg` and `class` for which they absolutely make sense) were actually missing values.
+The dataset did not have any missing data, however after analysing the feature distributions (Figure \@ref(fig:2-4-distributions)) and their meaning we found many 0 values that made no sense and were not physically possible (for example 0 value of `mass` which is BMI index - mass (in kilograms) divided by squared height (in meters)). According to an article about cost-sensitive classification [@2-4-cost], which addressed this dataset it is possible that some tests had never been carried out for some patients. This meant that the 0 values in our dataset (for features other than `preg` and `class` for which they absolutely make sense) were actually missing values.
 
 #### Dataset versions
 
@@ -128,35 +128,35 @@ Explanations themselves were implemented in the DALEX package [@2-4-DALEX].
 
 Local explanations allow us to better understand model's prediction from the level of single observations. This can be useful when we want to evaluate predictions for certain instances. For example, which values have the most importance for the particular observations, or how the change in variables would impact the result. Local explanations combined with professional expertise could sometimes hint towards potential problems with the model in case they contradict each other. 
 
-**Break Down**
+**Break Down** 
 
-In this explanation all observations start from the same base that is the mean prediction for all data. Next steps consist of fixing consecutive variables on values from the observation in question and measuring the change in mean prediction that is now calculated with some of the values fixed. This shift in mean prediction is interpreted as the impact of this variable's value on prediction for this observation. Figure (\@ref(fig:2-4-break-down)) shows the corresponding steps.
+In Break Down explanation [@xai1-breakdown] all observations start from the same base that is the mean prediction for all data. Next steps consist of fixing consecutive variables on values from the observation in question and measuring the change in mean prediction that is now calculated with some of the values fixed. This shift in mean prediction is interpreted as the impact of this variable's value on prediction for this observation. Figure (\@ref(fig:2-4-break-down)) shows the corresponding steps.
 
-```{r 2-4-break-down, fig.align='center',fig.cap='Panel A shows the distribution and mean prediction with values on the same level and above fixed on values from observation. Then change in mean is calculated and assigned to corresponding variables',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
+```{r 2-4-break-down, fig.align='center',fig.cap='Panel A shows the distribution of target values: in the first row overall distribution, and on the subsequent ones - distribution from the previous row with fixed value of the variable written on the left. For example, in the third row values of age and class variables are fixed. The red dot represents the mean of the distribution. On panel B only the mean value is shown. On panel C the change in mean (average impact) is calculated and assigned to corresponding variables.',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
 knitr::include_graphics('images/2-4-break_down_distr.png')
 ```
 
 
 A big drawback for this method is how the order of variable can influence the explanation outcome. This problem occurs most often as a result of existing interactions between variables as seen in (\@ref(fig:2-4-ordering))
 
-```{r 2-4-ordering, fig.align='center',fig.cap='Variables age and class interact with each other so the changing order results in different plots',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
+```{r 2-4-ordering, fig.align='center',fig.cap='Break Down output for the same observation but with different order of variables. Variables age and class interact with each other. Hence the change in order results in different values on plots.',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
 knitr::include_graphics('images/2-4-ordering.png')
 ```
 
 **Shap**
 
-Shap is a direct response to the biggest problem of Break Down method that is the ordering chosen for explanation could alter the results. Shap takes a number of permutation and calculates the average response of Break Down on these permutations. More permutations result in more stable explanations. Exemplary output is shown in figure (\@ref(fig:2-4-shap-ordering))
+Shap [@xai1-shapleyvalues] is a direct response to the biggest problem of Break Down method that is the ordering chosen for explanation could alter the results. Shap takes a number of permutation and calculates the average response of Break Down on these permutations. More permutations result in more stable explanations. Exemplary output is shown in figure (\@ref(fig:2-4-shap-ordering))
 
-```{r 2-4-shap-ordering, fig.align='center',fig.cap='Shap output. Average impact calculated with Break Down for 10 permutations',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
+```{r 2-4-shap-ordering, fig.align='center',fig.cap='Shap output for Johny D observation. Average impact of the variable on the prediction calculated with Break Down for 10 permutations, with boxplots showing the distribution of impacts from different permutations.',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
 knitr::include_graphics('images/2-4-shap_ordering.png')
 ```
 
 
 **Lime**
 
-The essence of Lime is to locally approximate the black box model with a glass box one. Then we can use it for local explanations that should yield results appropriate for the black box. Firstly, we generate data "close" to our observation (also called Point of Interest) and make predictions with black box model. Based on those predictions we try to fit the glass box model that accurately predicts those observations. In result we receive a glass box model that should behave the same as original model as long as we remain close to the Point of interest. Figure (\@ref(fig:2-4-lime-introduction)) describes the idea.
+The essence of Lime [@xai1-lime] is to locally approximate the black box model with a glass box one. Then we can use it for local explanations that should yield results appropriate for the black box. Firstly, we generate data "close" to our observation (also called Point of Interest) and make predictions with black box model. Based on those predictions we try to fit the glass box model that accurately predicts those observations. In result we receive a glass box model that should behave the same as original model as long as we remain close to the Point of interest. Figure (\@ref(fig:2-4-lime-introduction)) describes the idea.
 
-```{r 2-4-lime-introduction, fig.align='center',fig.cap='Colored areas correspond to different prediction for the black box model. Black cross is our Point of Interest and circles are generated data. The line represents our simpler model that approximates original model around Point of Interest',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
+```{r 2-4-lime-introduction, fig.align='center',fig.cap='Colored areas correspond to different prediction for the black box model. Black cross is our Point of Interest and circles are generated data. The line represents our simpler model that approximates original model around Point of Interest.',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
 knitr::include_graphics('images/2-4-lime_introduction.png')
 ```
 
@@ -165,13 +165,13 @@ This method is often used for datasets consisting of many variables. Methods lik
 
 **Ceteris Paribus**
 
-Ceteris Paribus is a Latin phrase meaning "all else unchanged". This accurately describes what it does. For the certain observation we take values that are interesting to us and observe how the prediction changes as we change values in those columns one at a time. This can yield interesting conclusions about change in values and its impact on predictions. Figures (\@ref(fig:2-4-titanicCeterisProfile01E-1)) and (\@ref(fig: 2-4-titanicCeterisProfile01D-1)) show prediction change as response for variable change.
+Ceteris Paribus [@EMA] is a Latin phrase meaning "all else unchanged". This accurately describes what it does. For the certain observation we take values that are interesting to us and observe how the prediction changes as we change values in those columns one at a time. This can yield interesting conclusions about change in values and its impact on predictions. Figures (\@ref(fig:2-4-titanicCeterisProfile01E-1)) and (\@ref(fig: 2-4-titanicCeterisProfile01D-1)) show prediction change as response for variable change.
 
-```{r 2-4-titanicCeterisProfile01E-1, fig.align='center',fig.cap='Shape of lines resembles the nature of the model. Dot shows value and models prediction for the observation', out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
+```{r 2-4-titanicCeterisProfile01E-1, fig.align='center',fig.cap='Ceteris-paribus profile for observation Henry using Logistic Regression and Random Forest models. Shape of lines shows how the prediction would change depending on the value of age and fare variables with all the other variables unchanged. Dot shows the real value and models prediction for this particular observation.', out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
 knitr::include_graphics('images/2-4-titanicCeterisProfile01E-1.png')
 ```
 
-```{r 2-4-titanicCeterisProfile01D-1, fig.align='center',fig.cap=' Ceteris Paribus shows different importance in variables and their changes for different observations.',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
+```{r 2-4-titanicCeterisProfile01D-1, fig.align='center',fig.cap=' Ceteris Paribus profile using Random Forest for two observations.Shape of lines shows how the prediction would change depending on the value of age and fare variables with all the other variables unchanged. Dot shows the real value and models prediction for this particular observation.',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
 knitr::include_graphics('images/2-4-titanicCeterisProfile01D-1.png')
 ```
 
@@ -184,24 +184,24 @@ As the name implies in global explanations we look at variables from the perspec
 
 **Feature Importance**
 
-The main idea behind Feature Importance is measuring how important each variable is for model's predictions. To do that we measure the change in AUC after permutating values of each variable. The bigger the change, the bigger importance of variable. To stabilize the results, we can measure average change for a number of permutations. In figure (\@ref(fig:2-4-TitanicRFFeatImp)) we can see that variable gender is the most important for model's prediction.
+The main idea behind Feature Importance [@2-4-pfi] is measuring how important each variable is for model's predictions. To do that we measure the change in AUC after permutating values of each variable. The bigger the change, the bigger importance of variable. To stabilize the results, we can measure average change for a number of permutations. In figure (\@ref(fig:2-4-TitanicRFFeatImp)) we can see that variable gender is the most important for model's prediction.
 
-```{r 2-4-TitanicRFFeatImp, fig.align='center',fig.cap=' Feature Importance output for 10 permutations',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
+```{r 2-4-TitanicRFFeatImp, fig.align='center',fig.cap='The average change in AUC after permutating values of each variable (Feature Importance) for 10 permutations, with boxplots showing the distribution of changes from different permutations.',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
 knitr::include_graphics('images/2-4-TitanicRFFeatImp10-1.png')
 ```
 
 **Partial Dependence**
 
-To put it short, Partial Dependence is the average of Ceteris Paribus for whole data. This results in average importance and impact of variable and its values. The similarities can be observed in figure (\@ref(fig:2-4-pdpIntuition-1))
+To put it short, Partial Dependence [@2-4-pdp] is the average of Ceteris Paribus for whole data. This results in average importance and impact of variable and its values. The similarities can be observed in figure (\@ref(fig:2-4-pdpIntuition-1))
 
-```{r 2-4-pdpIntuition-1, fig.align='center',fig.cap='Multiple observations with Ceteris Paribus and their average as Partial Dependence',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
+```{r 2-4-pdpIntuition-1, fig.align='center',fig.cap='On the left panel, Ceteris Paribus profile for age variable for multiple observations. On the right, their average as Partial Dependence, showing how the prediction would change depending on the value of age.',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
 knitr::include_graphics('images/2-4-pdpIntuition-1.png')
 ```
 
 
 As we can see observations can return different shapes for Ceteris Paribus, hence averaging them could mean loss of information. To answer this problem Partial Dependence implements grouping and clustering that could show the difference as shown in figure (\@ref(fig:2-4-pdpPart5-1)).
 
-```{r 2-4-pdpPart5-1, fig.align='center',fig.cap='Partial Dependence grouped by sex',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
+```{r 2-4-pdpPart5-1, fig.align='center',fig.cap='Partial Dependence of the prediction on the age variable for Random Forest model, with the observations grouped by gender. Shows how the average prediction differs for male and female passengers',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
 knitr::include_graphics('images/2-4-pdpPart5-1.png')
 ```
 
@@ -209,7 +209,7 @@ As in Ceteris Paribus this method is very simple and understandable. However, it
 
 **Accumulated Dependence**
 
-Also referred as Accumulated-Local Dependence. It is the direct answer for correlation issue in Partial Dependence. The construction of Accumulated Dependence is the same as in Ceteris Paribus. The only difference being how the observations are summarized. Partial Dependence uses marginal distribution while Accumulated Dependence uses conditional distribution. This means that when there are at most negligible correlations, Accumulated Dependence yields results very similar to Partial Dependence.
+Also referred as Accumulated-Local Dependence [@xai1-ale]. It is the direct answer for correlation issue in Partial Dependence. The construction of Accumulated Dependence is the same as in Ceteris Paribus. The only difference being how the observations are summarized. Partial Dependence uses marginal distribution while Accumulated Dependence uses conditional distribution. This means that when there are at most negligible correlations, Accumulated Dependence yields results very similar to Partial Dependence.
 
 
 ### Results
@@ -226,7 +226,7 @@ We compared the performance of the `ranger` model with default values on the tes
 |mice|0.8109|0.6736|0.1529|
 |skip|0.8095|0.6779|0.1847|
 
-Table: (\#tab:dataset-comparison) The value of performance measures AUC, Balanced Accuracy and False Negative Rate on dataset versions: original, naomit, mice and skip.
+Table: (\#tab:dataset-comparison) The value of performance measures AUC, Balanced Accuracy and False Negative Rate on dataset versions: original, naomit, mice and skip. For measures AUC and BAC higher value indicates better model, while for FNR - worse model.
 
 
 The `naomit` dataset has the best scores, however, using this dataset version may cause the loss of valuable information. Because of that, we are going to use `original` and `skip` versions for further analysis.
@@ -246,7 +246,7 @@ The models were checked with AUC, Balanced Accuracy and False Negative Rate meas
 |NaiveBayes|0.8116|0.6946|0.1783|
 |RandomForest|0.8155|0.7077|0.1656|
 
-Table: (\#tab:dataset-original) The value of performance measures AUC, Balanced Accuracy and False Negative Rate on original dataset version using 6 classification models.
+Table: (\#tab:dataset-original) The value of performance measures AUC, Balanced Accuracy and False Negative Rate on original dataset version using 6 classification models. For measures AUC and BAC higher value indicates better model, while for FNR - worse model.
 
 The measure values between models are quite similar, however Ada has the best Balanced Accuracy and Binomial has the lowest False Negative Rate.
 
@@ -261,7 +261,7 @@ The measure values between models are quite similar, however Ada has the best Ba
 |NaiveBayes|0.8276|0.7372|0.1338|
 |RandomForest|0.8061|0.7018|0.1911|
 
-Table: (\#tab:dataset-skip) The value of performance measures AUC, Balanced Accuracy and False Negative Rate on dataset version with skipped columns, using 6 classification models.
+Table: (\#tab:dataset-skip) The value of performance measures AUC, Balanced Accuracy and False Negative Rate on dataset version with skipped columns, using 6 classification models. For measures AUC and BAC higher value indicates better model, while for FNR - worse model.
 
 
 On this dataset version Binomial still has the lowest `FNR`, but no model has a sighnificantly better results than the `ranger` model.
@@ -274,20 +274,20 @@ Based on the results, two models: Ranger and Ada were chosen for further experim
 
 **Tuned Ranger**
 
- - num.trees=776, 
- - mtry=1,
- - min.node.size=8
- - splitrule="extratrees"
+ - num.trees = 776, 
+ - mtry = 1,
+ - min.node.size = 8
+ - splitrule = "extratrees"
  
 **Tuned Ada**
 
- - loss='logistic'
- - type='discrete',
- - iter=81,
- - max.iter=3,
- - minsplit=45, 
- - minbucket=4, 
- - maxdepth=1
+ - loss = 'logistic'
+ - type = 'discrete',
+ - iter = 81,
+ - max.iter = 3,
+ - minsplit = 45, 
+ - minbucket = 4, 
+ - maxdepth = 1
  
 
 The tuned models were checked with AUC, Balanced Accuracy and False Negative Rate measures on `skip` dataset version, with the  results shown in table (\@ref(tab:dataset-tuned))
@@ -297,32 +297,34 @@ The tuned models were checked with AUC, Balanced Accuracy and False Negative Rat
 |Tuned Ranger|0.8664|0.7375|0.1111|
 |Tuned Ada|0.8447|0.6937|0.1528|
 
-Table: (\#tab:dataset-tuned) The value of performance measures AUC, Balanced Accuracy and False Negative Rate on 2 dataset versions: original and with skipped columns, using tuned classification models Ranger and Ada.
+Table: (\#tab:dataset-tuned) The value of performance measures AUC, Balanced Accuracy and False Negative Rate on 2 dataset versions: original and with skipped columns, using tuned classification models Ranger and Ada.For measures AUC and BAC higher value indicates better model, while for FNR - worse model.
+
+The performance measures of tuned models are higher than the original ones, but ranger still proves to be a better classificator on this dataset.
 
 #### Global explanations results
 
 **Feature Importance**
 
-Figure (\@ref(fig:2-4-feature-importance)) shows Feature Importance for both Ada and Ranger models. As we can see, both agree with each other as to what variables are most important to them. Their predictions are mostly based on the values of *plas* variable and then *mass* and *age* come second.
+Figure (\@ref(fig:2-4-feature-importance)) shows Feature Importance for both Ada and Ranger models. As we can see, both agree with each other as to what variables are most important to them. Their predictions are mostly based on the values of `plas` variable and then `mass` and `age` come second.
 
-```{r 2-4-feature-importance, fig.align='center',fig.cap='Variable importance for Ada and Ranger based on AUC loss after permutations.',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
+```{r 2-4-feature-importance, fig.align='center',fig.cap=' Variable importance for Ada and Ranger based on average AUC loss after 10 permutations of this variable. Boxplots show the distribution of changes from different permutations.',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
 knitr::include_graphics('images/2-4-feature-importance.png')
 ```
 
 
 **Partial Dependence Profile**
 
-Partial Dependence profile seen in figure (\@ref(fig:2-4-pdp)) give us perhaps the most interesting results. Firstly, they are adequate to Feature importance in Figure TODO. The more important variables return wider range of average prediction and less important give less varied predictions respectively. Secondly, we can observe the difference in model's inner characteristics based on the shape of theirs PDP functions. Ada is more edgy and straight while ranger more smooth. 
-Based on results yielded by PDP and according to these two models we can conclude that, generally speaking the bigger the values the higher the chance of positive Diabetes test result.
+Partial Dependence profile seen in figure (\@ref(fig:2-4-pdp)) give us perhaps the most interesting results. Firstly, they are adequate to Feature importance in Figure (\@ref(fig:2-4-feature-importance)). The more important variables return wider range of average prediction and less important give less varied predictions respectively. Secondly, we can observe the difference in model's inner characteristics based on the shape of theirs PDP functions. Ada is more edgy and straight while ranger more smooth. 
+Based on results yielded by PDP and according to these two models we can conclude that, generally speaking the bigger the values the higher the chance of positive diabetes test result.
 
 Some other key observations include: 
 
-* Little to none impact by change of _age_ after 35 years of living.
-* A sudden increase in prediction with _mass_ reaching 30 being the border of obesity in BMI model.
-* Almost no change for ada prediction with change of _pedi_.
-* A big increase in prediction with 7th pregnancy.
+* For Ada model, little to none impact by change of `age` after 35 years of living. For ranger, a peak in the prediction value around the age of 50.
+* A sudden increase in prediction with `mass` reaching 30 being the border of obesity in BMI model.
+* Almost no change for ada prediction with change of `pedi`.
+* A slight increase in prediction with 7th `pregnancy`.
 
-```{r 2-4-pdp, fig.align='center',fig.cap='Average predictions with PDP for ada and ranger.',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
+```{r 2-4-pdp, fig.align='center',fig.cap='Average predictions with PDP for ada and ranger, showing how the prediction would change depending on the value of given variable. Shows the trend, that for most cases the bigger the value of variable the higher the chance of positive diabetes test result.',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
 knitr::include_graphics('images/2-4-pdp.png')
 ```
 
@@ -331,7 +333,7 @@ knitr::include_graphics('images/2-4-pdp.png')
 
 Accumulated Dependence gave us similar results to Partial Dependence, thus we can conclude that our dataset does not contain any problematic correlations. Comparison between PD and AD is plotted on the Figure (\@ref(fig:2-4-pdp-ale-mass)) for _mass_ variable.
 
-```{r 2-4-pdp-ale-mass, fig.align='center',fig.cap='Average predictions with PDP and ALE for ada and ranger.',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
+```{r 2-4-pdp-ale-mass, fig.align='center',fig.cap='Average predictions with PDP and ALE for ada and ranger. Simmilar shape of the PDP and ALE plots for each respective model indicates no problematic correlations with `mass` variable.',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
 knitr::include_graphics('images/2-4-pdp-ale-mass.png')
 ```
 
@@ -340,45 +342,48 @@ knitr::include_graphics('images/2-4-pdp-ale-mass.png')
 
 Local explainations for Ada and ranger models were very similar so we focused on the one with a bit better metrics, that is Ranger. 
 
-Ceteris Paribus shows us results adequate to Pratial Dependence Profile (See Figures (\@ref(fig:2-4-ceteris-paribus)) and (\@ref(fig:2-4-lime_190))). Predictions are very consistent in variable _plas_. However in _age_ and _pedi_ cases we can spot different trends in prediction behaviour. This could hint towards potential interactions between variables. As for _mass_ and _preg_ they differ mostly in initial prediction value. Overall tendency is rising.
+Ceteris Paribus shows us results adequate to Pratial Dependence Profile (See Figures (\@ref(fig:2-4-ceteris-paribus)) and (\@ref(fig:2-4-lime-190))). Predictions are very consistent in variable `plas`. However in `age` and `pedi` cases we can spot different trends in prediction behaviour. This could hint towards potential interactions between variables. As for `mass` and `preg` they differ mostly in initial prediction value. Overall tendency is rising.
 
 
-```{r 2-4-ceteris-paribus, fig.align='center',fig.cap='Ceteris Paribus predictions for five selected observations.',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
+```{r 2-4-ceteris-paribus, fig.align='center',fig.cap='Ceteris Paribus predictions for five selected observations: 140, 190, 202, 214 and 74. Plot shows how the prediction would change depending on the value of given variable. Dot shows the real value and models prediction for this particular observation.',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
 knitr::include_graphics('images/2-4-ceteris-paribus.png')
 ```
 
+**Observation 190**
 
-Let us analyze observation 190 in more detail. Lime explanation (Figure TODO) tells us three biggest factors approximated by glass box model. Having _plas_ lower than 100 in our case has significant negative impact on positive diagnosis of diabetes. On the other hand, having high _mass_ index and being in 30's adds to our probability of having diabetes.
+Let us analyze observation 190 in more detail. Lime explanation (Figure (\@ref(fig:2-4-lime-190))) tells us three biggest factors approximated by glass box model. Having `plas` lower than 100 in our case has significant negative impact on positive diagnosis of diabetes. On the other hand, having high `mass` index and being in 30's adds to our probability of having diabetes.
 
-```{r 2-4-lime_190, fig.align='center',fig.cap='Lime output for observation 190',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
+```{r 2-4-lime-190, fig.align='center',fig.cap='Lime output for observation 190. The predicted value was 0.162, indicating a healthy patient. This prediction was mostly influenced by a low value of `plas` variable, lowering the risk of diabetes. Patients age and mass slighly heightened the risk.',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
 knitr::include_graphics('images/2-4-lime_190.png')
 ```
 
 
-Breakdown and Shap (Figures (\@ref(fig:2-4-bd-190)) and (\@ref(fig:2-4-shap_190))) as opposed to Lime give us prediction change for exact values, not intervals. Because of that the results may be different. So is the case with the _age_ variable which behaves differently for Lime. According to Breakdown and Shap being 29 years of age slightly decreases prediction but Lime says otherwise. Not only it increases but also by a significant amount. Other variables seem to match their impact if just scaled down a bit for BD and Shap.
+Breakdown and Shap (Figures (\@ref(fig:2-4-bd-190)) and (\@ref(fig:2-4-shap-190))) as opposed to Lime give us prediction change for exact values, not intervals. Because of that the results may be different. So is the case with the _age_ variable which behaves differently for Lime. According to Breakdown and Shap being 29 years of age slightly decreases prediction but Lime says otherwise. Not only it increases but also by a significant amount. Other variables seem to match their impact if just scaled down a bit for BD and Shap.
 
-```{r 2-4-bd-190, fig.align='center',fig.cap='Breakdown output for observation 190',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
+```{r 2-4-bd-190, fig.align='center',fig.cap='Breakdown output for observation 190, influences of each variable of the prediction - red indicates lowering, and green heightening the prediction value',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
 knitr::include_graphics('images/2-4-bd_190.png')
 ```
 
-```{r 2-4-shap-190, fig.align='center',fig.cap='Shap output for observation 190',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
+```{r 2-4-shap-190, fig.align='center',fig.cap='Shap output for observation 190. Average impact of the variable on the prediction calculated with Break Down for 10 permutations, with boxplots showing the distribution of impacts from different permutations',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
 knitr::include_graphics('images/2-4-shap_190.png')
 ```
 
-The next observation we analyze is observation 214 for which the model has a prediction of about 44% for positive diagnosis of diabetes. Lime explanation (Figure (\@ref(fig:2-4-lime_214))) tells us that three biggest factors for this prediction are _pedi_, _plas_ and _mass_. This time the first one is _pedi_ with high value of over 0.5. Despite high values of _plas_ (over 115) and _mass_ (over 33), the prediction is higher than average for this dataset, but still lower than 50%.
+**Observation 214**
 
-```{r 2-4-lime_214, fig.align='center',fig.cap='Lime output for observation 214',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
+The next observation we analyze is observation 214 for which the model has a prediction of about 44% for positive diagnosis of diabetes. Lime explanation (Figure (\@ref(fig:2-4-lime-214))) tells us that three biggest factors for this prediction are `pedi`, `plas` and `mass`. This time the first one is `pedi` with high value of over 0.5. Despite high values of `plas` (over 115) and `mass` (over 33), the prediction is higher than average for this dataset, but still lower than 50%.
+
+```{r 2-4-lime-214, fig.align='center',fig.cap='Lime output for observation 214. The predicted value was 0.446, indicating a healthy patient, but with less certainty. This prediction was mostly influenced by higher values of `pedi`, `plas` and `mass` variables.',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
 knitr::include_graphics('images/2-4-lime_214.png')
 ```
 
 
-Breakdown and Shap (Figures (\@ref(fig:2-4-bd-214)) and (\@ref(fig:2-4-shap-214))) show similar results, just toned down. The biggest difference is the impact of _pedi_ which in Lime was nearly twice as big as the impact of _plas_ and _mass_. The only value making it less probable that the observation would have diabetes is _age_ equal to 28.
+Breakdown and Shap (Figures (\@ref(fig:2-4-bd-214)) and (\@ref(fig:2-4-shap-214))) show similar results, just toned down. The biggest difference is the impact of `pedi` which in Lime was nearly twice as big as the impact of `plas` and `mass`. The only value making it less probable that the observation would have diabetes is `age` equal to 28.
 
-```{r 2-4-bd-214, fig.align='center',fig.cap='Breakdown output for observation 214',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
+```{r 2-4-bd-214, fig.align='center',fig.cap='Breakdown output for observation 214, influences of each variable of the prediction - red indicates lowering, and green heightening the prediction value',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
 knitr::include_graphics('images/2-4-bd_214.png')
 ```
 
-```{r 2-4-shap-214, fig.align='center',fig.cap='Shap output for observation 214',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
+```{r 2-4-shap-214, fig.align='center',fig.cap='Shap output for observation 214. Average impact of the variable on the prediction calculated with Break Down for 10 permutations, with boxplots showing the distribution of impacts from different permutations',out.width="100%", echo=FALSE, warning=FALSE, message=FALSE}
 knitr::include_graphics('images/2-4-shap_214.png')
 ```
 
@@ -416,7 +421,7 @@ According to the National Institute of Diabetes and Digestive and Kidney Disease
 
 - **gestational diabetes** - Gestational diabetes is the type of diabets that develops during pregnancy and is caused by the hormonal changes of pregnancy along with genetic and lifestyle factors. Women with a history of gestational diabetes  have a greater chance of developing type 2 diabetes later in life.
 
-**Comparison**
+**Comparison with achieved results**
 
 The causes of diabetes according to experts directly correspond with the columns is the explained dataset:
 
@@ -430,9 +435,12 @@ Since all the women in the dataset have the same **ethnicity**, it is not a fact
 
 ### Conclusions
 
-The investigation of Diabetes dataset resulted in:
-- 
+The exploration of Diabetes dataset resulted in a discovery of initially unnoticeable NA values. After further examination of features distributions, we found out that `skin`, `insu`, `pres`, `mass` and `plas` have a significant amount of zero values which should not be present. After testing different datasets built by omitting and imputing variables or skipping observations, we concluded that the best solution would be removing `skin`, `insu` and `pres` variables and imputing `mass` and `plas`. 
 
-In this scenario the causes of diabetes indicated by the XAI methods match the causes presented by the medical professionals. The Explainable Artificial Intelligence is an extremely helpful tool. It can be used to gain better understanding of the classification models, especially the ones used for making medical diagnosis, where this understanding is crucial to patients health and safety. 
+Moving forward we tested a number of popular Machine Learning models on our data. Measures like AUC, BAC and FNR showed us that Ranger and Ada give us sufficient results to draw conclusions from. 
 
-What's next?
+After inspecting explanations on said models, it appears that generally speaking the bigger the values of variables other than age the higher the chance of positive diabetes test result. For Ada model, little to none impact by change of age after 35 years of living. For ranger, a peak in the prediction value around the age of 50. There is a sudden increase in prediction with mass reaching 30 being the border of obesity in BMI model. We observe almost no change for Ada prediction with different pedi values. There seems to be a slight increase in prediction with the 7th pregnancy.  
+
+In this scenario the causes of diabetes indicated by the XAI methods match the causes presented by the medical professionals. The Explainable Artificial Intelligence is an extremely helpful tool. It can be used to gain better understanding of the classification models, especially the ones used for making medical diagnosis, where this understanding is crucial to patients’ health and safety.  
+
+Further studies on diabetes prediction could include different ethnicity groups and genders. The medical data for models could be more complete and complex. Data with no missing values and potentially more features could also lead to more accurate models.  
